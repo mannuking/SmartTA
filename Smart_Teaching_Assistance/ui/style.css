@@ -1,0 +1,641 @@
+/* ============================================================================
+   Smart Teaching Assistant — Design System
+   Clean, minimal, professional
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ---------- Root Tokens ---------- */
+:root {
+    --primary: #4F46E5;
+    --primary-hover: #4338CA;
+    --primary-light: #EEF2FF;
+    --accent: #06B6D4;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --bg: #F8FAFC;
+    --surface: #FFFFFF;
+    --surface-solid: #FFFFFF;
+    --border: #E2E8F0;
+    --text: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+    --radius: 12px;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- Global ---------- */
+html,
+body,
+[data-testid="stAppViewContainer"],
+.main {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    color: var(--text) !important;
+    background-color: var(--bg) !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Inter', sans-serif !important;
+    color: var(--text) !important;
+    font-weight: 700 !important;
+}
+
+/* ---------- Hide default Streamlit chrome ---------- */
+#MainMenu,
+footer {
+    display: none !important;
+}
+
+/* Hide most of the header but keep the sidebar toggle visible */
+header[data-testid="stHeader"] {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
+
+/* Sidebar styling (collapsible — we no longer force it open) */
+section[data-testid="stSidebar"] {
+    min-width: 290px !important;
+    width: 290px !important;
+    background: var(--surface) !important;
+    border-right: 1px solid var(--border) !important;
+    padding-top: 0.75rem;
+    transition: margin-left 0.3s ease, visibility 0.3s ease;
+}
+
+section[data-testid="stSidebar"] * {
+    color: var(--text) !important;
+}
+
+section[data-testid="stSidebar"] .stButton button {
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+    background: transparent !important;
+    color: var(--text) !important;
+    border: 1px solid transparent !important;
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.15s ease;
+}
+
+section[data-testid="stSidebar"] .stButton button:hover {
+    background: var(--primary-light) !important;
+    border-color: var(--primary) !important;
+}
+
+section[data-testid="stSidebar"] .stButton button p {
+    color: var(--text) !important;
+    font-weight: 500 !important;
+}
+
+/* Active sidebar button */
+section[data-testid="stSidebar"] .stButton button[kind="primary"] {
+    background: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
+}
+
+section[data-testid="stSidebar"] .stButton button[kind="primary"] p {
+    color: white !important;
+}
+
+/* ---------- Progress Bar (custom) ---------- */
+.step-progress {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 1.25rem 0;
+    margin-bottom: 1.5rem;
+}
+
+.step-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.step-dot.done {
+    background: var(--success);
+    color: white;
+}
+
+.step-dot.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.step-dot.pending {
+    background: var(--border);
+    color: var(--text-muted);
+}
+
+.step-line {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    margin: 0 2px;
+}
+
+.step-line.done {
+    background: var(--success);
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+}
+
+/* ---------- Stat Pill ---------- */
+.stat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* ---------- Buttons (main area) ---------- */
+.stButton button[kind="primary"] {
+    background: #10B981 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 0.55rem 1.4rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s ease;
+    justify-content: flex-start !important;
+    text-align: left !important;
+}
+
+.stButton button[kind="primary"]:hover {
+    background: #059669 !important;
+    box-shadow: var(--shadow-md);
+}
+
+.stButton button[kind="secondary"] {
+    background: transparent !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px;
+    font-weight: 500;
+    justify-content: flex-start !important;
+    text-align: left !important;
+}
+
+.stButton button[kind="secondary"]:hover {
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+}
+
+/* ---------- Navigation bar (bottom) ---------- */
+.nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    margin-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+/* ---------- Inputs ---------- */
+.stTextArea textarea,
+.stTextInput input {
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    font-family: 'Inter', sans-serif !important;
+    color: var(--text) !important;
+}
+
+.stTextArea textarea:focus,
+.stTextInput input:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--primary-light) !important;
+}
+
+/* ---------- Expander ---------- */
+details[data-testid="stExpander"] {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    background: var(--surface) !important;
+}
+
+/* ---------- Metrics ---------- */
+div[data-testid="stMetricLabel"] {
+    color: var(--text-secondary) !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+}
+
+div[data-testid="stMetricValue"] {
+    color: var(--text) !important;
+    font-weight: 700 !important;
+}
+
+/* ---------- Alerts ---------- */
+.stAlert {
+    border-radius: 8px !important;
+}
+
+section[data-testid="stFileUploader"] {
+    border-radius: var(--radius) !important;
+}
+
+/* ---------- Status Container (generation feedback) ---------- */
+div[data-testid="stStatusWidget"] {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    background: var(--surface) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+div[data-testid="stStatusWidget"] summary {
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
+}
+
+/* ---------- Progress Bar ---------- */
+div[data-testid="stProgress"]>div>div {
+    border-radius: 6px !important;
+    overflow: hidden;
+}
+
+div[data-testid="stProgress"]>div>div>div {
+    transition: width 0.4s ease !important;
+    background: linear-gradient(90deg, var(--primary), var(--accent)) !important;
+    border-radius: 6px !important;
+}
+
+/* ---------- Download Button ---------- */
+.stDownloadButton button {
+    border-radius: 8px !important;
+    font-weight: 500 !important;
+    border: 1px solid var(--border) !important;
+    transition: all 0.15s ease;
+}
+
+.stDownloadButton button:hover {
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+    box-shadow: var(--shadow-sm);
+}
+
+/* ============================================================================
+   SIDEBAR — Pipeline-based design with live pulse & animations
+   ============================================================================ */
+
+/* ── Keyframe Animations ── */
+@keyframes sb-pulse-glow {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+    50%      { opacity: 0.85; box-shadow: 0 0 0 8px rgba(79, 70, 229, 0); }
+}
+@keyframes sb-pulse-dot-anim {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.5); opacity: 0.6; }
+}
+@keyframes sb-bar-shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+@keyframes sb-shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-3px); }
+    40%, 80% { transform: translateX(3px); }
+}
+
+/* ── Brand ── */
+.sb-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.25rem 0 0.85rem 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.85rem;
+}
+.sb-logo { font-size: 1.75rem; line-height: 1; }
+.sb-brand-text { display: flex; flex-direction: column; }
+.sb-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text) !important;
+    line-height: 1.2;
+}
+.sb-subtitle {
+    font-size: 0.68rem;
+    color: var(--text-muted) !important;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+/* ── Pipeline Wrapper ── */
+.sb-pipeline-wrap {
+    margin-bottom: 0.75rem;
+}
+.sb-pipeline-header {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.65rem;
+}
+.sb-pipeline-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted) !important;
+}
+
+/* ── Progress Ring ── */
+.sb-ring-wrap { width: 44px; height: 44px; flex-shrink: 0; }
+.sb-ring { width: 100%; height: 100%; }
+.sb-ring-track {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 2.8;
+}
+.sb-ring-fill {
+    fill: none;
+    stroke: var(--primary);
+    stroke-width: 2.8;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.6s ease;
+}
+.sb-ring-pct {
+    fill: var(--text) !important;
+    font-size: 0.38rem;
+    font-weight: 700;
+    text-anchor: middle;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ── Pipeline Steps ── */
+.sb-pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding-left: 0.2rem;
+}
+.sb-pipe-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+}
+.sb-pipe-item:hover { background: var(--bg); }
+.sb-pipe-active {
+    background: var(--primary-light) !important;
+    border-left: 3px solid var(--primary);
+    margin-left: -3px;
+}
+.sb-pipe-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+    background: var(--surface);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.sb-pipe-active .sb-pipe-icon {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--primary-light);
+    animation: sb-pulse-glow 2s ease-in-out infinite;
+}
+.sb-pipe-emoji {
+    font-size: 0.82rem;
+    line-height: 1;
+}
+.sb-pipe-check {
+    position: absolute;
+    bottom: -2px;
+    right: -4px;
+    font-size: 0.55rem;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    line-height: 1;
+}
+.sb-pipe-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.sb-pipe-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text) !important;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sb-pipe-status {
+    font-size: 0.65rem;
+    font-weight: 600;
+    line-height: 1;
+    margin-top: 1px;
+}
+
+/* Step state colours */
+.sb-st-done .sb-pipe-icon { border-color: var(--success) !important; }
+.sb-st-error .sb-pipe-icon { border-color: var(--danger) !important; animation: sb-shake 0.5s ease; }
+
+/* Connector between steps */
+.sb-connector {
+    display: flex;
+    justify-content: center;
+    padding-left: 0.2rem;
+    margin-left: calc(0.5rem + 13px);
+}
+.sb-conn-line {
+    width: 2px;
+    height: 10px;
+    background: var(--border);
+    border-radius: 1px;
+}
+
+/* ── Nav Section ── */
+.sb-nav-section {
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    margin-top: 0.5rem;
+}
+
+/* ── Live Pulse Card ── */
+.sb-pulse {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    background: linear-gradient(135deg, #EEF2FF 0%, #E0F2FE 100%);
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    border-radius: 10px;
+    padding: 0.7rem 0.75rem;
+    margin: 0.65rem 0;
+}
+.sb-pulse-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+    flex-shrink: 0;
+    margin-top: 3px;
+    animation: sb-pulse-dot-anim 1.4s ease-in-out infinite;
+}
+.sb-pulse-body { flex: 1; min-width: 0; }
+.sb-pulse-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--primary) !important;
+    margin-bottom: 0.4rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sb-pulse-bar-track {
+    background: rgba(79, 70, 229, 0.12);
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 0.4rem;
+}
+.sb-pulse-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+    background-size: 200% 100%;
+    animation: sb-bar-shimmer 2s linear infinite;
+    transition: width 0.4s ease;
+}
+.sb-pulse-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.sb-pulse-stat {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--text-secondary) !important;
+    white-space: nowrap;
+}
+
+/* ── Alert Card (errors) ── */
+.sb-alert-card {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    border-radius: 10px;
+    padding: 0.65rem 0.75rem;
+    margin: 0.65rem 0;
+}
+.sb-alert-error {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    animation: sb-shake 0.5s ease;
+}
+.sb-alert-icon { font-size: 1.2rem; flex-shrink: 0; }
+.sb-alert-body { flex: 1; min-width: 0; }
+.sb-alert-title {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--danger) !important;
+    margin-bottom: 0.15rem;
+}
+.sb-alert-msg {
+    font-size: 0.68rem;
+    color: #991B1B !important;
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+/* ── Course Card ── */
+.sb-course {
+    background: var(--primary-light);
+    border: 1px solid rgba(79, 70, 229, 0.15);
+    border-radius: 10px;
+    padding: 0.65rem 0.75rem;
+    margin: 0.65rem 0;
+}
+.sb-course-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+.sb-course-icon { font-size: 1.3rem; line-height: 1; }
+.sb-course-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text) !important;
+    line-height: 1.2;
+}
+.sb-course-diff {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--text-secondary) !important;
+}
+.sb-badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+.sb-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-secondary) !important;
+    white-space: nowrap;
+}
+
+/* ── Footer ── */
+.sb-footer {
+    border-top: 1px solid var(--border);
+    padding-top: 0.5rem;
+    margin-top: 0.75rem;
+}

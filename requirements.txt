@@ -25,4 +25,17 @@ requests>=2.31.0
 tqdm>=4.66.0
 
 # Image search (optional, for diagram/image fetching)
-ddgs>=9.0.0
+# Now OPTIONAL -- the PDF-Extract-Kit integration provides figures locally.
+# If not installed, the image_downloader becomes a no-op.
+# ddgs>=9.0.0
+
+# ── RAG stack (Phase B: PDF-Extract-Kit integration) ────────────────
+# All free, local, MIT-licensed. Models download on first use to
+# ~/.cache/huggingface/ (or %USERPROFILE%/.cache/huggingface/ on Windows).
+#   - sentence-transformers : loads bge-m3 + clip-vit-base-patch32
+#   - chromadb              : persistent local vector store
+#   - rank-bm25             : optional BM25 reranker (currently unused;
+#                             BGE-reranker-v2-m3 does the heavy lifting)
+sentence-transformers>=3.0.0
+chromadb>=0.5.0
+rank-bm25>=0.2.2

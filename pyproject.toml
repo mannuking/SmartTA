@@ -50,6 +50,12 @@ dependencies = [
     "datasets>=3.0.0",
     "chromadb>=0.5.0",
     "rank-bm25>=0.2.2",
+    # DocLayout-YOLO layout detection. This is the right package to
+    # load the doclayout_yolo_*.pt checkpoints -- it has the custom
+    # Conv2d_BN architecture patches that `ultralytics 8.4+` no
+    # longer ships (which would crash predict with
+    # 'Conv' object has no attribute 'bn').
+    "doclayout-yolo>=0.0.4",
 
     # Utilities
     "python-dotenv>=1.0.0",
@@ -73,6 +79,7 @@ dev = [
 # edit the index URL in pyproject.toml to cu124 for torch 2.6+.
 gpu = [
     "torch>=2.5.1",
+    "torchvision>=0.20.0",
 ]
 
 # ── The `sta` command ───────────────────────────────────────────
@@ -122,6 +129,9 @@ explicit = true
 
 [tool.uv.sources]
 torch = [
+    { index = "pytorch-cu121", extra = "gpu" },
+]
+torchvision = [
     { index = "pytorch-cu121", extra = "gpu" },
 ]
 

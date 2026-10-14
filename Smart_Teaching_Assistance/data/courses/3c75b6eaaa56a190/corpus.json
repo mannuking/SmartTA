@@ -1,0 +1,103 @@
+{
+  "pdf_hash": "3c75b6eaaa56a190",
+  "pdf_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\test_corpus\\HOPCROFT_chapter1_25pages.pdf",
+  "pdf_filename": "HOPCROFT_chapter1_25pages.pdf",
+  "created_at": 1792019236.482197,
+  "total_pages": 25,
+  "num_figures": 4,
+  "num_text_chunks": 27,
+  "section_tree": {
+    "T1": {
+      "title": "Automata Theory,",
+      "page_start": 1,
+      "children": {}
+    },
+    "T2": {
+      "title": "Languages,",
+      "page_start": 1,
+      "children": {}
+    },
+    "T3": {
+      "title": "Computation",
+      "page_start": 1,
+      "children": {}
+    },
+    "T4": {
+      "title": "Automata Theory,",
+      "page_start": 2,
+      "children": {}
+    },
+    "T5": {
+      "title": "Languages,",
+      "page_start": 2,
+      "children": {}
+    },
+    "T6": {
+      "title": "Computation",
+      "page_start": 2,
+      "children": {}
+    }
+  },
+  "figures": [
+    {
+      "id": "fig-p18-c0",
+      "page": 18,
+      "bbox": [
+        373,
+        443,
+        598,
+        593
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\3c75b6eaaa56a190\\figures\\page0018_figure_000.png",
+      "caption": "Finite state machine toggle diagram",
+      "description": "This diagram illustrates a simple finite state machine with two states, labeled \"off\" and \"on\". An incoming arrow pointing to the \"off\" state indicates it is the designated starting state of the system. Directed arcs with the label \"Push\" connect the two states in a cyclical manner, showing how the system transitions from \"off\" to \"on\" and back to \"off\" upon receiving the input event.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p19-c1",
+      "page": 19,
+      "bbox": [
+        253,
+        223,
+        716,
+        289
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\3c75b6eaaa56a190\\figures\\page0019_figure_001.png",
+      "caption": "Finite automaton recognizing the word then",
+      "description": "This diagram illustrates a deterministic finite automaton designed to recognize the exact string \"then\". It consists of a start state followed by a linear sequence of four intermediate states, connected by directed transitions labeled with successive characters: t, h, e, and n. Each step accumulates the matched prefix until reaching the final accepting state, denoted by a double circle containing the complete target word.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p23-c2",
+      "page": 23,
+      "bbox": [
+        151,
+        126,
+        821,
+        284
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\3c75b6eaaa56a190\\figures\\page0023_figure_002.png",
+      "caption": "Mathematical proof derivation table",
+      "description": "This figure presents a formal two-column mathematical proof consisting of five numbered statements and corresponding justifications. The left column lists sequential algebraic relations, starting with the sum of four squares $x = a^2 + b^2 + c^2 + d^2$ and positive integer constraints, progressing step-by-step to inequalities such as $x \\ge 4$ and finally $2^x \\ge x^2$. The right column provides the logical and arithmetic reasoning for each step, citing prior statements, basic arithmetic properties, and Theorem 1.3 to validate the deduction.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p24-c3",
+      "page": 24,
+      "bbox": [
+        233,
+        414,
+        740,
+        572
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\3c75b6eaaa56a190\\figures\\page0024_figure_003.png",
+      "caption": "Mathematical statement translation table",
+      "description": "This table illustrates the translation of informal mathematical statements into formal predicate logic or set-theoretic notation. The left column presents intuitive assertions involving sets, such as finiteness, infiniteness, and set complementation. The right column provides the corresponding rigorous mathematical definitions using cardinalities, existential quantifiers, unions, and intersections. This side-by-side comparison serves as a useful reference for students learning to formalize mathematical arguments and proofs.",
+      "section_id": "T6",
+      "content_text": ""
+    }
+  ]
+}

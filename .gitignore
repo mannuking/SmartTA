@@ -37,3 +37,4 @@ downloaded_images/
 dist/
 build/
 *.egg-info/
+logs_ingest_*.log

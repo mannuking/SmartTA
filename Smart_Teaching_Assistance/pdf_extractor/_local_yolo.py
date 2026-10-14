@@ -28,12 +28,20 @@ import fitz
 logger = logging.getLogger(__name__)
 
 
-_REPO_ROOT = Path(__file__).resolve().parents[3]   # SmartTA_fork/Smart_Teaching_Assistance/pdf_extractor/_local_yolo.py
-#                  ^                                      ^
-#                  parents[0] = pdf_extractor
-#                  parents[1] = Smart_Teaching_Assistance
-#                  parents[2] = SmartTA_fork
-#                  parents[3] = PDF_extractor (the parent project that holds PDF-Extract-Kit/)
+# Resolution order for the YOLO model file:
+#   1. PDF_EXTRACTOR_PARENT_DIR env var (set in .env) -- explicit override
+#   2. <PDF_extractor>/PDF-Extract-Kit/ (the sibling project on this machine)
+#   3. Hardcoded paths under _REPO_ROOT
+_PDF_EXTRACTOR_PARENT = os.environ.get("PDF_EXTRACTOR_PARENT_DIR")
+if _PDF_EXTRACTOR_PARENT:
+    _REPO_ROOT = Path(_PDF_EXTRACTOR_PARENT).resolve()
+else:
+    _REPO_ROOT = Path(__file__).resolve().parents[3]   # SmartTA_fork/Smart_Teaching_Assistance/pdf_extractor/_local_yolo.py
+    #                  ^                                      ^
+    #                  parents[0] = pdf_extractor
+    #                  parents[1] = Smart_Teaching_Assistance
+    #                  parents[2] = SmartTA_fork
+    #                  parents[3] = PDF_extractor (the parent project that holds PDF-Extract-Kit/)
 
 _MODEL_CANDIDATES = [
     _REPO_ROOT / "PDF-Extract-Kit" / "models" / "Layout" / "YOLO" / "doclayout_yolo_ft.pt",

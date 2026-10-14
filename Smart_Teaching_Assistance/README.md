@@ -26,12 +26,12 @@ A comprehensive AI-powered educational content generation system with PDF extrac
 git clone <repository-url>
 cd PDF_extractor
 
-# Install dependencies
-pip install -r Smart_Teaching_Assistance/requirements.txt
+# Install dependencies (use uv; pip is not supported)
+uv sync
 
 # Set up environment variables
 cp .env.example .env
-# Edit .env and add your GEMINI_API_KEY
+# Edit .env and add your MINIMAX_API_KEY (or GEMINI_API_KEY for fallback)
 ```
 
 ### Running

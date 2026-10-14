@@ -28,19 +28,26 @@ The fork keeps the upstream code's call shape: every `genai.configure(...)`, `ge
 
 ## Quick Start
 
-### 1. Install dependencies
+### 1. Install dependencies (one command, no pip)
+
+This project uses **uv** for everything — install, run, package. No
+`pip install`, no virtualenv juggling. If you don't have uv:
 
 ```bash
-pip install -r requirements.txt
+# Install uv (Windows / macOS / Linux)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"   # Windows
+curl -LsSf https://astral.sh/uv/install.sh | sh                                      # macOS/Linux
 ```
 
-If you use the project conda env (e.g. `pdf-extractor`):
+Then from the project root:
 
 ```bash
-conda activate pdf-extractor
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+uv sync                            # creates .venv/ + installs everything from pyproject.toml
 ```
+
+That's it. No `pip install`, no conda activation, no separate lock file
+to manage. The first sync takes ~2-5 min; subsequent syncs are
+sub-second.
 
 ### 2. Configure your API keys
 
@@ -52,7 +59,7 @@ MINIMAX_API_KEY=your_minimax_api_key_here
 MINIMAX_API_BASE=https://api.minimax.io/anthropic
 MINIMAX_MODEL=MiniMax-M3
 
-# Fallback (Google Gemini)
+# Fallback (Google Gemini) -- only if you want the auto-fallback
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
@@ -63,7 +70,22 @@ Get a Gemini key at https://aistudio.google.com/apikey (free).
 ### 3. Run the app
 
 ```bash
-streamlit run app.py
+uv run sta                         # start the Streamlit UI
+uv run sta doctor                  # pre-flight check
+uv run sta models                  # pre-download embedding models (first run, ~5 min)
+uv run sta ingest my_textbook.pdf  # ingest a PDF via the CLI
+uv run sta query my_textbook.pdf "DFA construction"   # RAG test
+uv run sta export my_textbook.pdf  # render PDF/DOCX from figures
+```
+
+`uv run sta` is the unified entry point. Without a subcommand it
+launches the UI (same as the old `streamlit run app.py`). With a
+subcommand it does the matching CLI action.
+
+To install dev tools (pytest, hypothesis) too:
+
+```bash
+uv sync --extra dev
 ```
 
 ### 4. (Optional) Override in-app
@@ -74,12 +96,14 @@ You can also enter your **MiniMax API key** in the sidebar.
 
 ```
 SmartTA/
-├── app.py                          # Streamlit entry point
-├── requirements.txt                # Python dependencies
+├── app.py                          # Streamlit entry point (legacy; `uv run sta` is preferred)
+├── pyproject.toml                  # Single source of truth for deps + scripts
 ├── README.md
 ├── .gitignore
 └── Smart_Teaching_Assistance/      # Core package
     ├── __init__.py
+    ├── sta_cli.py                  # The `sta` command (UI, ingest, query, export, models, doctor)
+    ├── minimax_client.py           # MiniMax M3 + Gemini fallback LLM client
     ├── config.py                   # Configuration management
     ├── database.py                 # SQLite persistence layer
     ├── error_handling.py           # Error types & recovery
@@ -88,30 +112,43 @@ SmartTA/
     │   ├── generator.py            # Main ContentGenerator class
     │   ├── roadmap.py              # Roadmap generation
     │   ├── lesson_plan.py          # Lesson plan generation
-    │   ├── lecture_notes.py        # Detailed notes generation
+    │   ├── lecture_notes.py        # Detailed notes generation (RAG-aware)
     │   ├── review.py               # Summaries & flashcards
     │   ├── study_tools.py          # Question banks
-    │   ├── image_downloader.py     # Diagram/image fetching
+    │   ├── image_downloader.py     # Diagram/image fetching (DDG soft-fail)
     │   └── ...
-    ├── pdf_extractor/              # PDF text & image extraction
+    ├── pdf_extractor/              # PDF text & figure extraction (Phase A)
+    │   ├── corpus.py
+    │   ├── section_detector.py
+    │   ├── _local_yolo.py
+    │   └── ingest.py
+    ├── rag/                        # RAG vector store (Phase B+C)
+    │   ├── embeddings.py
+    │   ├── store.py
+    │   ├── retriever.py
+    │   └── figure_placer.py
     ├── personalization/            # Audience-specific adaptation
-    ├── export_manager/             # Multi-format export
+    ├── export_manager/             # Multi-format export (Phase F: figure_block)
+    │   ├── engine_pdf.py
+    │   ├── engine_docx.py
+    │   └── engine_json.py
     ├── gpu_manager/                # Optional GPU support
     └── ui/                         # Streamlit UI layer
         ├── app.py                  # Main Streamlit app logic
         ├── state_manager.py        # Session state management
         ├── background_worker.py    # Threaded generation workers
+        ├── rag_bridge.py           # Streamlit session → RAG
         ├── components/             # Reusable UI components
         │   ├── dashboard.py        # Dashboard with usage guide
         │   ├── sidebar.py          # Sidebar with API key input
         │   └── common.py           # CSS, progress bars
         └── steps/                  # 6-step workflow
-            ├── step_input.py
-            ├── step_roadmap.py
+            ├── step_input.py       # PDF upload + ingest
+            ├── step_roadmap.py     # RAG-grounded roadmap
             ├── step_lesson_plan.py
-            ├── step_notes.py
+            ├── step_notes.py       # Per-topic RAG + auto figure placement
             ├── step_personalize.py
-            └── step_export.py
+            └── step_export.py      # DOCX + PDF with embedded figures
 ```
 
 ## How It Works
@@ -142,8 +179,10 @@ The free Gemini API tier has usage limits. If you hit them:
 
 ### Deployment Notes
 
-- This repo includes `runtime.txt` pinned to Python 3.11 for cloud stability.
-- Dependencies are read from root `requirements.txt`.
+- This repo includes `pyproject.toml` + `uv.lock` (replaces the old
+  `requirements.txt`). Streamlit Cloud reads `requirements.txt` if
+  present — keep one as a copy for cloud compatibility, or set up
+  the cloud env to use uv.
 - API keys can be entered in-app from the dashboard. You can also set `GEMINI_API_KEY` in app secrets/env if preferred.
 
 ### Important Persistence Note

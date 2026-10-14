@@ -1,0 +1,127 @@
+[project]
+name = "smartta"
+version = "1.0.0"
+description = "Smart Teaching Assistant -- MiniMax-M3 + PDF-Extract-Kit edition"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+
+# Single source of truth for runtime deps. Managed by `uv sync`.
+# If you add a dep, edit ONLY this list -- not requirements.txt.
+# Use `uv add <pkg>` to update.
+dependencies = [
+    # Core web UI
+    "streamlit>=1.28.0",
+    "Werkzeug>=3.0.0",
+
+    # PDF text + image extraction
+    "PyMuPDF>=1.23.0",
+    "Pillow>=10.0.0",
+
+    # YOLO layout detection (PDF-Extract-Kit's DocLayout-YOLO)
+    # Only used if `pdf_extractor_parent_dir` env var is unset and
+    # the model file exists locally. The torch install is the cu121
+    # build so YOLO + BGE embeddings can use the RTX 3070. To get
+    # CPU-only torch instead, see [cpu] extra below.
+    "torch>=2.0.0; sys_platform != 'darwin'",
+    "torch>=2.0.0; sys_platform == 'darwin'",
+    "ultralytics>=8.0.0; sys_platform != 'darwin'",
+
+    # Export (DOCX + PDF)
+    "python-docx>=1.1.0",
+    "reportlab>=4.0.0",
+
+    # ML / RAG
+    "scikit-learn>=1.3.0",
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+
+    # ── Embedding stack (see DESIGN.md for the model pin notes) ──
+    # CRITICAL: sentence-transformers 5+ requires transformers 4.56+,
+    # which requires huggingface-hub <1.0 to avoid HfFolder import
+    # errors. Don't let uv resolve to a newer hub version.
+    "sentence-transformers>=5.0.0",
+    "transformers>=4.56.0,<6.0",
+    "huggingface-hub>=0.30.0,<1.0",
+    "datasets>=3.0.0",
+    "chromadb>=0.5.0",
+    "rank-bm25>=0.2.2",
+
+    # Utilities
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+    "tqdm>=4.66.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "hypothesis>=6.90.0",
+]
+# GPU torch. By default `uv sync` pulls the CPU-only torch from
+# PyPI, which works on any machine but makes YOLO + BGE slow.
+# For a real RTX 3070/4080 class GPU, install:
+#   uv sync --extra gpu
+# This re-resolves torch from the cu121 index and enables CUDA.
+gpu = [
+    "torch>=2.0.0",
+]
+
+# ── The `sta` command ───────────────────────────────────────────
+# This is the unified entry point. Replaces the old
+# `streamlit run app.py` invocation.
+#
+#   uv run sta              -> start the Streamlit UI
+#   uv run sta ingest <pdf> -> ingest a PDF, build corpus
+#   uv run sta query ...    -> query an existing corpus
+#   uv run sta export ...   -> export a course to PDF/DOCX
+#   uv run sta models       -> pre-download embedding models
+#   uv run sta doctor       -> run sanity checks
+#
+# The console_scripts entry below makes `sta` available on PATH
+# inside the venv, so `uv run sta` finds it without fuss.
+[project.scripts]
+sta = "Smart_Teaching_Assistance.sta_cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["Smart_Teaching_Assistance"]
+
+# ── uv-specific config ──────────────────────────────────────────
+# Forces uv to manage the venv in `.venv/` (project-local). This is
+# the default in uv 0.8+, but pin it for explicitness.
+[tool.uv]
+package = true
+managed = true
+
+# Which Python version to auto-install if none is found. Matches
+# what the rest of the PDF_extractor project uses.
+[tool.uv.pip]
+python-version = "3.12"
+
+# Point torch at the cu121 build from PyTorch's official index
+# when the [gpu] extra is enabled. By default (no extra) torch
+# comes from PyPI as a CPU-only build, which works on any machine
+# but is slow. For RTX 3070/4080 class hardware:
+#   uv sync --extra gpu
+[[tool.uv.index]]
+name = "pytorch-cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cu121", extra = "gpu" },
+]
+
+# ── dev tooling config (pytest + ruff) ──────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["Smart_Teaching_Assistance/tests"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

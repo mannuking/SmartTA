@@ -22,7 +22,7 @@ Why the parent PDF_extractor project is preferred:
     matching (matching.py). Reusing them keeps the surface area small.
   - We fall back to a built-in lightweight extractor if the parent
     project is not on sys.path, so the SmartTA fork can still run
-    standalone after `pip install -r requirements.txt`.
+    standalone after `uv sync` (see `pyproject.toml`).
 
 Lazy model loading:
   - DocLayout-YOLO and the MiniMax client are heavy. We import them
@@ -154,6 +154,7 @@ def ingest_pdf(
     courses_dir: str | Path,
     progress_cb: Optional[Callable[[int, int, str], None]] = None,
     force: bool = False,
+    device: Optional[str] = None,
 ) -> CourseCorpus:
     """Run the full extraction pipeline on `pdf_path` and return a CourseCorpus.
 
@@ -163,11 +164,15 @@ def ingest_pdf(
             Typically `Smart_Teaching_Assistance/data/courses`.
         progress_cb: Optional (done, total, message) callback for UI.
         force: Re-extract even if a cached corpus exists.
+        device: YOLO device override (`"cuda"`, `"cpu"`, `"mps"`). If None,
+            the parent pipeline's default wins.
 
     Returns:
         CourseCorpus. Cached one is returned if available.
     """
     pdf_path = str(Path(pdf_path).resolve())
+    if device is not None:
+        os.environ["PDF_EXTRACT_DEVICE"] = device
     pdf_hash = hash_pdf(pdf_path)
     courses_dir = _ensure_dir(courses_dir)
     corpus_dir = _ensure_dir(courses_dir / pdf_hash)
@@ -219,11 +224,13 @@ def ingest_pdf(
             # No `classes` filter -- it always returns all 3 types (figure/table/formula),
             # and we filter for "figure" downstream because tables and formulas get
             # regenerated as text by the LLM during notes generation.
+            # Device priority: PDF_EXTRACT_DEVICE env var > auto-detect (cuda if avail).
+            _dev = os.environ.get("PDF_EXTRACT_DEVICE") or ("cuda" if _cuda_available() else "cpu")
             figures_raw = extract_layout_visuals(
                 pdf_path=pdf_path,
                 pdf_hash=pdf_hash,
                 images_dir=str(figures_dir),
-                device="cuda" if _cuda_available() else "cpu",
+                device=_dev,
                 dpi=144,
             )
             # Filter to figures only.

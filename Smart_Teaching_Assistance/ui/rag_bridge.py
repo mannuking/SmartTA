@@ -20,9 +20,9 @@ from typing import Optional
 
 import streamlit as st
 
-from .pdf_extractor.corpus import CourseCorpus
-from .rag.retriever import retrieve, RetrievalContext
-from .rag import store as _store
+from Smart_Teaching_Assistance.pdf_extractor.corpus import CourseCorpus
+from Smart_Teaching_Assistance.rag.retriever import retrieve, RetrievalContext
+from Smart_Teaching_Assistance.rag import store as _store
 
 
 logger = logging.getLogger(__name__)

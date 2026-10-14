@@ -39,4 +39,5 @@ build/
 *.egg-info/
 logs_ingest_*.log
 data/courses/
+**/data/courses/
 logs_*.log

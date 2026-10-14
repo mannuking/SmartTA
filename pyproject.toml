@@ -36,11 +36,16 @@ dependencies = [
     "pandas>=2.0.0",
 
     # ── Embedding stack (see DESIGN.md for the model pin notes) ──
-    # CRITICAL: sentence-transformers 5+ requires transformers 4.56+,
-    # which requires huggingface-hub <1.0 to avoid HfFolder import
-    # errors. Don't let uv resolve to a newer hub version.
+    # CRITICAL pinning:
+    #   - sentence-transformers 5+ requires transformers 4.56+, which
+    #     requires huggingface-hub <1.0 to avoid HfFolder import errors.
+    #   - transformers >=4.50 enforces a torch>=2.6 requirement when
+    #     loading cross-encoder models (CVE-2025-32434 mitigation).
+    #     We pin to 4.45-4.49 so the bge-reranker-v2-m3 loads cleanly
+    #     with torch 2.5.1+cu121 (the latest cu121 build) AND avoids
+    #     the new strict check.
     "sentence-transformers>=5.0.0",
-    "transformers>=4.56.0,<6.0",
+    "transformers>=4.45.0,<4.50",
     "huggingface-hub>=0.30.0,<1.0",
     "datasets>=3.0.0",
     "chromadb>=0.5.0",
@@ -63,8 +68,11 @@ dev = [
 # For a real RTX 3070/4080 class GPU, install:
 #   uv sync --extra gpu
 # This re-resolves torch from the cu121 index and enables CUDA.
+# Note: torch 2.5.1 is the latest on the cu121 index. If you
+# upgrade your nvidia driver to >=535 and have CUDA 12.4 runtime,
+# edit the index URL in pyproject.toml to cu124 for torch 2.6+.
 gpu = [
-    "torch>=2.0.0",
+    "torch>=2.5.1",
 ]
 
 # ── The `sta` command ───────────────────────────────────────────

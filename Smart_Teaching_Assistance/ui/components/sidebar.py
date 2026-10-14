@@ -111,7 +111,7 @@ def _build():
             unsafe_allow_html=True,
         )
 
-        # ── User Profile ─────────────────────────────────────────────
+        # ── User Profile (compact) ─────────────────────────────────
         username = st.session_state.get("username", "User")
         with st.container(border=True):
             cols = st.columns([1, 3])
@@ -119,19 +119,17 @@ def _build():
             with cols[1]:
                 st.markdown(f"**{username}**")
                 from Smart_Teaching_Assistance.ui.components.auth import logout
-                if st.button("🚪 Logout", key="sb_logout"):
+                if st.button("🚪 Logout", key="sb_logout", use_container_width=True):
                     logout()
 
-
         if not has_api_key():
-            # Stop here if no API key is configured
             st.markdown('<div style="height:200px"></div>', unsafe_allow_html=True)
             _render_footer()
             return
 
-        # ── Visual Pipeline ──────────────────────────────────────────
+        # ── Visual Pipeline (clean, one row per step) ──────────────
         pct = _pct()
-        # ring SVG
+        # Ring with progress
         ring = (
             f'<svg viewBox="0 0 36 36" class="sb-ring">'
             f'<path class="sb-ring-track" d="M18 2.0845a15.9155 15.9155 0 010 31.831 15.9155 15.9155 0 010-31.831"/>'
@@ -140,7 +138,6 @@ def _build():
             f'<text x="18" y="20.5" class="sb-ring-pct">{pct}%</text></svg>'
         )
 
-        # Build the step pipeline cards
         pipeline_html = ""
         for i, (label, icon) in enumerate(zip(STEPS, STEP_ICONS)):
             state = _step_state(i)
@@ -148,7 +145,10 @@ def _build():
             cur = st.session_state.get("step", -1)
             is_active = cur == i
             active_cls = "sb-pipe-active" if is_active else ""
-            connector = '<div class="sb-connector"><div class="sb-conn-line"></div></div>' if i < 5 else ""
+            connector = (
+                '<div class="sb-connector"><div class="sb-conn-line"></div></div>'
+                if i < 5 else ""
+            )
 
             pipeline_html += (
                 f'<div class="sb-pipe-item {cls} {active_cls}" data-step="{i}">'
@@ -158,7 +158,8 @@ def _build():
                 f'</div>'
                 f'<div class="sb-pipe-info">'
                 f'<span class="sb-pipe-label">{label}</span>'
-                f'<span class="sb-pipe-status" style="color:{color}">{_STATUS_MAP[state][0]}</span>'
+                f'<span class="sb-pipe-status" style="color:{color}">'
+                f'{_STATUS_MAP[state][0]}</span>'
                 f'</div></div>'
                 f'{connector}'
             )
@@ -174,135 +175,37 @@ def _build():
             unsafe_allow_html=True,
         )
 
-        # Navigation buttons (functional — the HTML above is visual only)
-        with st.container():
-            st.markdown('<div class="sb-nav-section">', unsafe_allow_html=True)
-            if st.button("🏠 Dashboard", use_container_width=True,
-                         type="primary" if st.session_state.get("step") == -1 else "secondary",
-                         key="sb_dash"):
-                go(-1); st.rerun()
-            cols = st.columns(2)
-            for i, (label, icon) in enumerate(zip(STEPS, STEP_ICONS)):
-                col = cols[i % 2]
-                state = _step_state(i)
-                is_active = st.session_state.get("step") == i
-                with col:
-                    st.button(
-                        f"{icon} {label.split()[0]}",
-                        key=f"sb_{i}",
-                        use_container_width=True,
-                        type="primary" if is_active else "secondary",
-                        on_click=go, args=(i,),
-                    )
-            st.markdown('</div>', unsafe_allow_html=True)
+        # ── LIVE PROGRESS — always visible when something is running ──
+        # Reads from BOTH the background-worker registry AND the
+        # sidebar_progress_* session keys. Earlier code only read the
+        # latter, so when a background worker was running, the pulse
+        # bar showed nothing -- the user saw a 0% bar that disappeared.
+        _render_live_progress()
 
-        # ── LIVE PULSE — always visible when a task is running ──────
-        task = st.session_state.get("sidebar_current_task", "")
-        last_err = st.session_state.get("sidebar_last_error", "")
-
-        # Check background workers for real-time progress (even on other pages)
-        frac = 0.0; plabel = ""; eta = ""; elapsed = ""
-        _found_active = False
-        for _wkey, _wlabel in [("notes_worker", "Detailed Notes"), ("lp_worker", "Lesson Plan")]:
-            _w = st.session_state.get(_wkey)
-            if _w is not None and hasattr(_w, "is_running") and _w.is_running:
-                prog = _w.progress
-                task = _wlabel
-                frac = prog.get("frac", 0.0)
-                plabel = prog.get("label", "")
-                eta = prog.get("eta_str", "")
-                elapsed = prog.get("elapsed_str", "")
-                _found_active = True
-                break
-        if not _found_active:
-            frac = st.session_state.get("sidebar_progress_frac", 0.0)
-            plabel = st.session_state.get("sidebar_progress_label", "")
-            eta = st.session_state.get("sidebar_eta", "")
-            elapsed = st.session_state.get("sidebar_elapsed", "")
-
-        if task:
-            bar_w = f"{max(frac * 100, 2):.0f}%"
-
-            stat_spans = ""
-            if plabel:
-                stat_spans += f'<span class="sb-pulse-stat">📊 {plabel}</span>'
-            if elapsed:
-                stat_spans += f'<span class="sb-pulse-stat">⏱ {elapsed}</span>'
-            if eta:
-                stat_spans += f'<span class="sb-pulse-stat">⏳ {eta}</span>'
-
-            st.markdown(
-                f'<div class="sb-pulse">'
-                f'<div class="sb-pulse-dot"></div>'
-                f'<div class="sb-pulse-body">'
-                f'<div class="sb-pulse-title">{task}</div>'
-                f'<div class="sb-pulse-bar-track">'
-                f'<div class="sb-pulse-bar-fill" style="width:{bar_w}"></div></div>'
-                f'<div class="sb-pulse-stats">{stat_spans}</div>'
-                f'</div></div>',
-                unsafe_allow_html=True,
-            )
-        elif last_err:
-            st.markdown(
-                f'<div class="sb-alert-card sb-alert-error">'
-                f'<div class="sb-alert-icon">⚠️</div>'
-                f'<div class="sb-alert-body">'
-                f'<div class="sb-alert-title">Last Error</div>'
-                f'<div class="sb-alert-msg">{last_err[:180]}</div>'
-                f'</div></div>',
-                unsafe_allow_html=True,
-            )
-
-        # ── Course Card ─────────────────────────────────────────────
+        # ── Course Card with action buttons ──────────────────────
         subj = st.session_state.get("subject_name", "")
         if subj:
-            diff = st.session_state.get("difficulty", "")
-            topics_n = len(st.session_state.get("all_notes_data", []))
-            fc_n = len(st.session_state.get("flashcards", []))
-            qb_n = len(st.session_state.get("question_bank", []))
-            gl_n = len(st.session_state.get("glossary", []))
-
-            badges = ""
-            for done_check, emoji, lbl in [
-                (st.session_state.get("syllabus_text"), "✅", "Syllabus"),
-                (st.session_state.get("roadmap_generated"), "🗺️", "Roadmap"),
-                (st.session_state.get("lesson_plan_generated"), "📝", "Plan"),
-                (topics_n, "📖", f"{topics_n} notes"),
-                (fc_n, "🃏", f"{fc_n} cards"),
-                (qb_n, "❓", f"{qb_n} Qs"),
-                (gl_n, "📚", f"{gl_n} terms"),
-            ]:
-                if done_check:
-                    badges += f'<span class="sb-badge">{emoji} {lbl}</span>'
-
-            diff_html = f'<span class="sb-course-diff">🎯 {diff.title()}</span>' if diff else ""
-
-            st.markdown(
-                f'<div class="sb-course">'
-                f'<div class="sb-course-header">'
-                f'<span class="sb-course-icon">📚</span>'
-                f'<div><div class="sb-course-name">{subj}</div>{diff_html}</div></div>'
-                f'<div class="sb-badge-row">{badges}</div>'
-                f'</div>',
-                unsafe_allow_html=True,
-            )
+            _render_course_card(subj)
 
         # ── Activity Log (collapsible) ──────────────────────────────
         log = st.session_state.get("activity_log", [])
         if log:
             with st.expander(f"📋 Activity Log ({len(log)})", expanded=False):
-                for entry in log[:20]:
+                for entry in log[:15]:
                     lvl = entry.get("level", "info")
-                    color_map = {"success": "#10B981", "error": "#EF4444",
-                                 "warning": "#F59E0B", "progress": "#4F46E5", "info": "#94A3B8"}
+                    color_map = {
+                        "success": "#10B981", "error": "#EF4444",
+                        "warning": "#F59E0B", "progress": "#4F46E5",
+                        "info": "#94A3B8",
+                    }
                     c = color_map.get(lvl, "#94A3B8")
                     st.markdown(
                         f'<div style="display:flex;gap:6px;font-size:0.72rem;'
                         f'padding:3px 0;border-bottom:1px solid #f1f5f9">'
-                        f'<span style="color:#94a3b8;font-family:monospace;min-width:42px">'
-                        f'{entry.get("ts","")}</span>'
-                        f'<span>{entry.get("icon","")}</span>'
-                        f'<span style="color:{c}">{entry.get("msg","")}</span></div>',
+                        f'<span style="color:#94a3b8;font-family:monospace;'
+                        f'min-width:42px">{entry.get("ts", "")}</span>'
+                        f'<span>{entry.get("icon", "")}</span>'
+                        f'<span style="color:{c}">{entry.get("msg", "")}</span></div>',
                         unsafe_allow_html=True,
                     )
 
@@ -315,16 +218,14 @@ def _build():
                 "Roadmap": "✅" if st.session_state.get("roadmap_generated") else "❌",
                 "Lesson Plan": "✅" if st.session_state.get("lesson_plan_generated") else "❌",
                 "Notes": "✅" if st.session_state.get("detailed_notes_generated") else "❌",
-                "Reviewed": "✅" if st.session_state.get("review_completed") else "❌",
                 "Course ID": st.session_state.get("course_id", "—"),
             }
             for k, v in debug.items():
                 st.markdown(f"**{k}:** `{v}`")
 
-            st.markdown("---")
             sizes = {
                 "Syllabus": len(st.session_state.get("syllabus_text", "")),
-                "PDF": len(st.session_state.get("pdf_text", "")),
+                "PDF text": len(st.session_state.get("pdf_text", "")),
                 "Notes MD": len(st.session_state.get("notes_markdown", "")),
                 "Topics": len(st.session_state.get("all_notes_data", [])),
             }
@@ -334,6 +235,197 @@ def _build():
 
         _render_device_toggle()
         _render_footer()
+
+
+def _render_live_progress():
+    """Live progress card. Pulls from BOTH the background-worker
+    registry and the sidebar_progress_* session keys.
+
+    Old behavior: only read sidebar_progress_frac, which was only
+    written by step-level update_sidebar_progress() callbacks. When
+    the lesson-plan or notes BACKGROUND WORKER was running, the
+    progress bar was empty (0%) or invisible -- the user had no
+    feedback. Now we ALSO read the worker.progress dict directly,
+    so as long as either source has a fraction > 0, the bar fills.
+    """
+    last_err = st.session_state.get("sidebar_last_error", "")
+
+    # 1) Check background workers first (this is the real-time source)
+    frac = 0.0
+    plabel = ""
+    eta = ""
+    elapsed = ""
+    task = ""
+    found_active = False
+    for wkey, wlabel in [
+        ("lp_worker", "Lesson Plan"),
+        ("notes_worker", "Detailed Notes"),
+    ]:
+        w = st.session_state.get(wkey)
+        if w is not None and hasattr(w, "is_running") and w.is_running:
+            prog = w.progress
+            frac = float(prog.get("frac", 0.0))
+            plabel = str(prog.get("label") or prog.get("message") or "")
+            eta = str(prog.get("eta_str") or "")
+            elapsed = str(prog.get("elapsed_str") or "")
+            task = wlabel
+            found_active = True
+            break
+
+    # 2) Fall back to sidebar_progress_* (set by step callbacks)
+    if not found_active:
+        frac = max(frac, float(st.session_state.get("sidebar_progress_frac", 0.0)))
+        plabel = plabel or str(st.session_state.get("sidebar_progress_label", ""))
+        eta = eta or str(st.session_state.get("sidebar_eta", ""))
+        elapsed = elapsed or str(st.session_state.get("sidebar_elapsed", ""))
+        task = st.session_state.get("sidebar_current_task", "")
+
+    # 3) Render
+    if task or found_active:
+        bar_w = f"{max(frac * 100, 4):.0f}%"
+        stat_spans = ""
+        if plabel:
+            stat_spans += f'<span class="sb-pulse-stat">📊 {plabel}</span>'
+        if elapsed:
+            stat_spans += f'<span class="sb-pulse-stat">⏱ {elapsed}</span>'
+        if eta:
+            stat_spans += f'<span class="sb-pulse-stat">⏳ {eta}</span>'
+
+        st.markdown(
+            f'<div class="sb-pulse">'
+            f'<div class="sb-pulse-dot"></div>'
+            f'<div class="sb-pulse-body">'
+            f'<div class="sb-pulse-title">{task or "Working"}</div>'
+            f'<div class="sb-pulse-bar-track">'
+            f'<div class="sb-pulse-bar-fill" style="width:{bar_w}"></div></div>'
+            f'<div class="sb-pulse-stats">{stat_spans}</div>'
+            f'</div></div>',
+            unsafe_allow_html=True,
+        )
+    elif last_err:
+        st.markdown(
+            f'<div class="sb-alert-card sb-alert-error">'
+            f'<div class="sb-alert-icon">⚠️</div>'
+            f'<div class="sb-alert-body">'
+            f'<div class="sb-alert-title">Last Error</div>'
+            f'<div class="sb-alert-msg">{last_err[:180]}</div>'
+            f'</div></div>',
+            unsafe_allow_html=True,
+        )
+
+
+def _render_course_card(subj: str):
+    """Course summary card with quick-action buttons.
+
+    The OLD version was just a name + badges. No actions. The user
+    had to scroll the pipeline nav at the top to jump around. The
+    NEW version puts the most common actions right on the card:
+    go to the current step, jump to Export, or copy the subject name.
+    """
+    diff = st.session_state.get("difficulty", "")
+    topics_n = len(st.session_state.get("all_notes_data", []))
+    fc_n = len(st.session_state.get("flashcards", []))
+    qb_n = len(st.session_state.get("question_bank", []))
+    gl_n = len(st.session_state.get("glossary", []))
+
+    badges = ""
+    for done_check, emoji, lbl in [
+        (st.session_state.get("syllabus_text"), "✅", "Syllabus"),
+        (st.session_state.get("roadmap_generated"), "🗺️", "Roadmap"),
+        (st.session_state.get("lesson_plan_generated"), "📝", "Plan"),
+        (st.session_state.get("detailed_notes_generated"), "📖", "Notes"),
+        (fc_n, "🃏", f"{fc_n} cards"),
+        (qb_n, "❓", f"{qb_n} Qs"),
+        (gl_n, "📚", f"{gl_n} terms"),
+    ]:
+        if done_check:
+            badges += f'<span class="sb-badge">{emoji} {lbl}</span>'
+
+    diff_html = (
+        f'<span class="sb-course-diff">🎯 {diff.title()}</span>' if diff else ""
+    )
+
+    st.markdown(
+        f'<div class="sb-course">'
+        f'<div class="sb-course-header">'
+        f'<span class="sb-course-icon">📚</span>'
+        f'<div><div class="sb-course-name">{subj}</div>{diff_html}</div></div>'
+        f'<div class="sb-badge-row">{badges}</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    # Quick-action buttons: jump to the right step. Disabled if the
+    # prerequisite isn't met.
+    cur_step = st.session_state.get("step", -1)
+    has_syllabus = bool(st.session_state.get("syllabus_text") and subj)
+    has_roadmap = bool(st.session_state.get("roadmap_generated"))
+    has_lp = bool(st.session_state.get("lesson_plan_generated"))
+    has_notes = bool(st.session_state.get("detailed_notes_generated"))
+
+    # Two rows of three, each is a quick-jump.
+    r1c1, r1c2, r1c3 = st.columns(3)
+    with r1c1:
+        if st.button(
+            "📋 Input",
+            key="qa_input",
+            use_container_width=True,
+            type="primary" if cur_step == 0 else "secondary",
+            disabled=cur_step == 0,
+        ):
+            go(0); st.rerun()
+    with r1c2:
+        if st.button(
+            "🗺️ Plan",
+            key="qa_roadmap",
+            use_container_width=True,
+            type="primary" if cur_step == 1 else "secondary",
+            disabled=not has_syllabus or cur_step == 1,
+            help="Generate a roadmap" if not has_syllabus else "Open Roadmap step",
+        ):
+            go(1); st.rerun()
+    with r1c3:
+        if st.button(
+            "📝 LP",
+            key="qa_lp",
+            use_container_width=True,
+            type="primary" if cur_step == 2 else "secondary",
+            disabled=not has_roadmap or cur_step == 2,
+            help="Generate a roadmap first" if not has_roadmap else "Open Lesson Plan step",
+        ):
+            go(2); st.rerun()
+
+    r2c1, r2c2, r2c3 = st.columns(3)
+    with r2c1:
+        if st.button(
+            "📖 Notes",
+            key="qa_notes",
+            use_container_width=True,
+            type="primary" if cur_step == 3 else "secondary",
+            disabled=not has_lp or cur_step == 3,
+            help="Generate a lesson plan first" if not has_lp else "Open Notes step",
+        ):
+            go(3); st.rerun()
+    with r2c2:
+        if st.button(
+            "🎯 Adapt",
+            key="qa_personalize",
+            use_container_width=True,
+            type="primary" if cur_step == 4 else "secondary",
+            disabled=not has_notes or cur_step == 4,
+            help="Generate notes first" if not has_notes else "Open Personalize step",
+        ):
+            go(4); st.rerun()
+    with r2c3:
+        if st.button(
+            "📤 Export",
+            key="qa_export",
+            use_container_width=True,
+            type="primary" if cur_step == 5 else "secondary",
+            disabled=not has_notes or cur_step == 5,
+            help="Generate notes first" if not has_notes else "Open Export step",
+        ):
+            go(5); st.rerun()
 
 
 def _render_device_toggle():

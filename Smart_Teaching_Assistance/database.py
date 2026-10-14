@@ -171,7 +171,7 @@ class Database:
             CREATE TABLE IF NOT EXISTS api_keys (
                 key_value TEXT NOT NULL,
                 user_id INTEGER,
-                provider TEXT DEFAULT 'gemini',
+                provider TEXT DEFAULT 'minimax',
                 is_active INTEGER DEFAULT 1,
                 last_used TIMESTAMP,
                 error_count INTEGER DEFAULT 0,

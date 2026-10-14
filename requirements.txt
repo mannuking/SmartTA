@@ -1,6 +1,15 @@
+# SmartTA-fork requirements (MiniMax-M3 edition)
+#
+# Changes from upstream:
+#   * Removed `google-generativeai` -- the fork ships its own MiniMax
+#     client at `Smart_Teaching_Assistance/minimax_client.py` that uses
+#     only stdlib (urllib + json + base64). This removes the heavy
+#     transitive dep chain (grpcio, protobuf, etc.) and makes the app
+#     installable on machines where pip cannot reach Google's index.
+#   * Everything else identical to upstream.
+
 # Core
 streamlit>=1.28.0
-google-generativeai>=0.3.0
 PyMuPDF>=1.23.0
 python-docx>=1.1.0
 scikit-learn>=1.3.0

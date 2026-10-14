@@ -10,7 +10,8 @@ import logging
 
 import fitz  # PyMuPDF
 from PIL import Image
-import google.generativeai as genai
+# Swap google-generativeai for our MiniMax-M3 shim. Same surface.
+from .. import minimax_client as genai
 
 logger = logging.getLogger(__name__)
 

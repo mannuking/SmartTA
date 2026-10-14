@@ -8,7 +8,8 @@ from typing import Dict, List, Optional
 from datetime import datetime
 import logging
 
-import google.generativeai as genai
+# Swap google-generativeai for our MiniMax-M3 shim. Same surface.
+from .. import minimax_client as genai
 
 logger = logging.getLogger(__name__)
 

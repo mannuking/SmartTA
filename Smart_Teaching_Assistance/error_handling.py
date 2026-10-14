@@ -199,7 +199,7 @@ def handle_api_errors(func):
                 raise APIRateLimitError("API quota exceeded. Please check your API plan or wait until it resets.")
             elif 'invalid api key' in error_str or '401' in error_str:
                 raise ContentGenerationError(
-                    "Invalid API key. Please check your GEMINI_API_KEY configuration.",
+                    "Invalid API key. Please check your MINIMAX_API_KEY (or GEMINI_API_KEY for fallback) configuration.",
                     recoverable=False
                 )
             elif 'timeout' in error_str:

@@ -8,7 +8,10 @@ import logging
 from collections import OrderedDict
 from typing import Dict, List, Optional
 
-import google.generativeai as genai
+# Swap Gemini SDK for our MiniMax-M3 shim. Same surface, different model.
+# NOTE: minimax_client is at Smart_Teaching_Assistance/minimax_client.py,
+# so we import from the package root (.. from inside content_generator/).
+from .. import minimax_client as genai
 
 from .constants import LESSON_PLAN_STRUCTURE_TAGS
 

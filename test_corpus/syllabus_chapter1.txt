@@ -1,0 +1,83 @@
+Course Title: Theory of Computation — Chapter 1: Automata, The Methods and the Madness
+Course Code: TOC-CORE-101
+Level: Undergraduate / 3rd semester Computer Science
+Prerequisites: Discrete Mathematics, Introductory Programming
+
+Course Description:
+This unit introduces the foundational concepts of automata theory, situating
+them within the broader landscape of theoretical computer science. The
+emphasis is on the *methods* (proof techniques, formal languages, finite
+state systems) and the *madness* (why computability, complexity, and
+intractability matter for working software engineers, not just theorists).
+The unit is the opening chapter of Hopcroft, Motwani & Ullman's
+"Introduction to Automata Theory, Languages, and Computation" and
+sets the stage for the rest of the course.
+
+Learning Objectives:
+By the end of this unit, students will be able to:
+  1. Articulate why the study of automata and complexity is part of
+     the core of computer science (software for digital circuits,
+     lexical analyzers, text search, protocol verification).
+  2. Recognise the central concepts that recur throughout the book:
+     alphabet, string, language, deterministic vs nondeterministic
+     systems, the trade-off between expressiveness and analyzability.
+  3. Apply the standard proof techniques used in this field:
+     deductive proofs, reformulation, proof by contradiction, proof
+     by induction (simple, structural, and mutual), pigeonhole
+     principle.
+  4. Reason informally about finite automata: states, transitions,
+     acceptors, the relationship between a system and its abstract
+     state machine.
+  5. Distinguish tractable from intractable problems at an intuitive
+     level, and explain why this matters in practice.
+
+Unit Outline:
+  1. Why Study Automata Theory
+     1.1 Introduction
+     1.2 The central role of finite automata in hardware and software
+         (digital circuits, lexical analyzers, text search, protocol
+         verification)
+     1.3 Why this book is structured the way it is
+  2. Introduction to Finite Automata
+     2.1 An informal picture: a system with a finite number of states
+     2.2 The two basic finite-state models: deterministic and
+         nondeterministic
+     2.3 Finite automata in real systems: elevators, vending machines,
+         traffic lights
+  3. Structural Representations
+     3.1 Transition graphs
+     3.2 Transition tables
+     3.3 Trade-offs and when to use which representation
+  4. Automata and Complexity
+     4.1 Decidability vs undecidability (preview)
+     4.2 Tractable vs intractable problems
+     4.3 The role of automata theory in the working programmer's life
+  5. Languages, Strings, and Alphabets
+     5.1 Alphabets and strings
+     5.2 Languages as sets of strings
+     5.3 Operations on languages
+  6. The Central Concepts of Automata Theory (Part 1)
+     6.1 Deductive proofs
+     6.2 Proofs by contradiction
+     6.3 Proofs by induction (simple induction)
+  7. The Central Concepts of Automata Theory (Part 2)
+     7.1 Structural induction
+     7.2 Mutual induction
+     7.3 The pigeonhole principle and its consequences
+  8. Exercises and Gradience Problems
+     8.1 Routine exercises
+     8.2 Gradience problems (extended reasoning)
+
+Assessment Plan:
+  - Weekly problem set (proof technique focus): 30%
+  - Midterm covering Sections 1-5: 25%
+  - Term project: design a finite-state model for a real system of
+    the student's choice (elevator, vending machine, protocol, etc.):
+    25%
+  - Final exam (full chapter): 20%
+
+Reference Material:
+  Primary: Hopcroft, Motwani, Ullman — "Introduction to Automata
+    Theory, Languages, and Computation" (3rd ed.), Chapter 1.
+  Secondary: Sipser — "Introduction to the Theory of Computation",
+    Chapters 0-1.

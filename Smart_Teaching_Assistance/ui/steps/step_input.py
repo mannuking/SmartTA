@@ -3,6 +3,7 @@
 import streamlit as st
 import os
 import tempfile
+from pathlib import Path
 
 from Smart_Teaching_Assistance.ui.steps._shared import (
     get_config, get_db, save_course_state, MAX_BOOK_TOKENS,

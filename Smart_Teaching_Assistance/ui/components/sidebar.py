@@ -336,14 +336,34 @@ def _build():
 
 
 def _render_footer():
-    """Render the sidebar footer with reset/clear buttons."""
+    """Render the sidebar footer with reset/clear buttons.
+
+    Reset  : wipe the in-memory session AND navigate back to the
+             Dashboard (step=-1). From the Dashboard the user can
+             "Create New Course" to start a fresh pipeline.
+    Clear  : wipe just the sidebar activity log + last-error banner.
+             Keeps the current step / course intact (useful when
+             you just want a clean log feed).
+    """
     st.markdown('<div class="sb-footer">', unsafe_allow_html=True)
     c1, c2 = st.columns(2)
     with c1:
-        if st.button("🔄 Reset", use_container_width=True, key="sb_reset"):
-            reset_session(); st.rerun()
+        if st.button(
+            "🔄 Reset",
+            use_container_width=True,
+            key="sb_reset",
+            help="Clear the current course and return to the Dashboard so you can start a new pipeline from Step 1.",
+        ):
+            reset_session()
+            st.session_state["step"] = -1   # back to Dashboard
+            st.rerun()
     with c2:
-        if st.button("🧹 Clear", use_container_width=True, key="sb_clear"):
+        if st.button(
+            "🧹 Clear",
+            use_container_width=True,
+            key="sb_clear",
+            help="Just clear the sidebar activity log and error banner. Keeps the current course loaded.",
+        ):
             st.session_state.activity_log = []
             st.session_state.sidebar_last_error = ""
             st.rerun()

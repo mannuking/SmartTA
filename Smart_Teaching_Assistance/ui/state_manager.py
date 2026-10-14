@@ -92,6 +92,12 @@ def _defaults():
         user_id=None,                     # For multi-tenancy
         username=None,
         auth_token=None,
+        _skip_autoload_once=False,        # Set by Reset to suppress the
+                                          # next _auto_load_last_course() call
+                                          # (otherwise the user clicks Reset
+                                          # and the most recent course
+                                          # re-loads, making it look like
+                                          # nothing happened).
     )
 
 def init_state():
@@ -215,6 +221,11 @@ def _load_global_settings():
 
 def _auto_load_last_course():
     """Auto-load the last active course for the logged-in user."""
+    if st.session_state.get("_skip_autoload_once"):
+        # Reset/Clear was just clicked -- honor it, don't re-load the
+        # last course behind the user's back.
+        st.session_state["_skip_autoload_once"] = False
+        return
     if st.session_state.get("course_id") is not None:
         # Already loaded
         _reconnect_workers(st.session_state.course_id)
@@ -458,8 +469,17 @@ def delete_course(course_id):
             st.session_state[k] = v
 
 def reset_session():
+    """Wipe the in-memory session and skip the next auto-load.
+
+    This is what the sidebar's "Reset" button calls. After Reset, the
+    user expects to see a clean slate -- NOT the most recent course
+    re-loaded by _auto_load_last_course() on the next rerun. So we
+    set _skip_autoload_once=True; init_state consumes the flag and
+    leaves the session empty.
+    """
     for k, v in _defaults().items():
         st.session_state[k] = v
+    st.session_state["_skip_autoload_once"] = True
 
 
 # ── Sidebar Activity Log Helpers ─────────────────────────────────────────────

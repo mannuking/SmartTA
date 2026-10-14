@@ -320,7 +320,9 @@ def _sync_lp_worker_to_session(worker: BackgroundLPWorker, total_nodes: int):
 
 # ── Private: Live progress display (auto-refreshing fragment) ────────────────
 
-@st.fragment(run_every=timedelta(seconds=2))
+# Rerun twice per second so elapsed/ETA tick visibly. Streamlit fragments
+# re-rendering at 0.5s is fine for a single row of metrics (negligible CPU).
+@st.fragment(run_every=timedelta(milliseconds=500))
 def _render_lp_live_progress(worker: BackgroundLPWorker, total_nodes: int):
     prog = worker.progress
     status = prog.get("status", "idle")

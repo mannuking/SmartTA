@@ -27,12 +27,33 @@ from typing import Callable, Dict, List, Optional
 
 import requests
 
+# Module-level logger, defined before the optional import below so the
+# "package not installed" log line works.
+logger = logging.getLogger(__name__)
+
+# The original project pulled lecture diagrams from DuckDuckGo image
+# search (`ddgs` package, formerly `duckduckgo_search`). For the
+# PDF-Extract-Kit-driven pipeline we instead use locally-extracted
+# figures from the source PDF, so the web image downloader is OPTIONAL.
+# If neither `ddgs` nor `duckduckgo_search` is installed, we set DDGS
+# to None and `populate_images_parallel()` becomes a no-op rather than
+# crashing the whole lecture-notes step.
+DDGS = None
 try:
-    from ddgs import DDGS
+    from ddgs import DDGS as _DDGS_NEW
+    DDGS = _DDGS_NEW
 except ImportError:
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", RuntimeWarning)
-        from duckduckgo_search import DDGS
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            from duckduckgo_search import DDGS as _DDGS_OLD
+            DDGS = _DDGS_OLD
+    except ImportError:
+        DDGS = None
+        logger.info(
+            "image_downloader: no ddgs / duckduckgo_search package installed. "
+            "Web image fetch will be skipped -- use PDF-Extract-Kit figures instead."
+        )
 
 # Suppress noisy rename warnings from legacy duckduckgo_search package.
 warnings.filterwarnings(
@@ -42,8 +63,6 @@ warnings.filterwarnings(
 )
 
 from .constants import DOWNLOAD_DIR
-
-logger = logging.getLogger(__name__)
 
 # ── Module-level DDG rate-limiter (shared across all callers) ────────────────
 
@@ -104,7 +123,12 @@ def _search_images(query: str, max_results: int = 8) -> List[str]:
     Uses a fresh DDGS context manager per call to avoid stale-session 403s,
     and retries internally with exponential backoff.  On later retries the
     query is shortened to force a fresh DDG vqd token.
+
+    Returns an empty list if the web image search package is not installed
+    (the PDF-Extract-Kit pipeline provides local figures instead).
     """
+    if DDGS is None:
+        return []
     for attempt in range(_DDG_SEARCH_RETRIES):
         q = _simplify_query(query, attempt)
         _ddg_wait()
@@ -288,8 +312,25 @@ def populate_images_parallel(
     Args:
         all_notes:  List of topic dicts (mutated in-place).
         download_workers: Thread-pool size for parallel downloads.
-        progress_cb: ``(done, total, message)`` callback.
+        progress_cb:      ``(done, total, message)`` callback.
+
+    Note: if `ddgs` (or `duckduckgo_search`) isn't installed, this becomes
+    a no-op for the web-image step -- placeholders remain in the notes
+    but no images are downloaded. PDF-Extract-Kit figures are wired in
+    separately by the parent pipeline.
     """
+    if DDGS is None:
+        logger.info(
+            "populate_images_parallel: web image search disabled (no ddgs "
+            "package). Skipping %d placeholders -- they will use locally-"
+            "extracted PDF figures instead.",
+            sum(1 for t in all_notes for e in t.get("elements", [])
+                if e.get("type") == "image_placeholder" and not e.get("image_local_path")),
+        )
+        if progress_cb:
+            progress_cb(0, 0, "Web image fetch disabled (no ddgs)")
+        return
+
     # ── Collect placeholders needing images ───────────────────────────
     placeholders: List[Dict] = []
     for topic in all_notes:

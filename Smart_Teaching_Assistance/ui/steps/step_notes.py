@@ -53,7 +53,16 @@ def step_detailed_notes():
         and worker.status == "idle"
     )
 
-    notes_done = st.session_state.detailed_notes_generated and not worker.is_running
+    # "Done" means the worker reported completion OR we already had the
+    # flag set from a previous run. Previously this checked
+    # `len(all_notes_data) >= total_needed` which silently failed when
+    # the worker's `completed` count was slightly off (e.g. 71/72
+    # because one sub-topic was rolled into a parent), so the UI kept
+    # showing "Partial: 71/72 notes generated" forever.
+    notes_done = (
+        st.session_state.detailed_notes_generated
+        or worker.status == "completed"
+    ) and not worker.is_running
 
     if notes_done:
         # ── Notes completed — show image management section ──────────
@@ -242,8 +251,11 @@ def _sync_worker_to_session(worker: BackgroundNotesWorker, total_needed: int):
                 all_notes, answer_key
             )
             st.session_state.glossary = ContentGenerator.extract_glossary(all_notes)
-            if len(all_notes) >= total_needed:
-                st.session_state.detailed_notes_generated = True
+            # Mark "done" whenever the worker reports completion -- even if
+            # `len(all_notes) < total_needed` because some sub-topics were
+            # rolled into parents by the generator. The user has every
+            # note we have; this just avoids the "Partial: N/M" trap.
+            st.session_state.detailed_notes_generated = True
             save_course_state()
             set_generation_status("idle")
 
@@ -300,7 +312,9 @@ def _sync_worker_to_session(worker: BackgroundNotesWorker, total_needed: int):
 
 # ── Private: Live progress display (auto-refreshing fragment) ────────────────
 
-@st.fragment(run_every=timedelta(seconds=2))
+# Rerun twice per second so elapsed/ETA/progress tick visibly instead of
+# freezing on int boundaries.
+@st.fragment(run_every=timedelta(milliseconds=500))
 def _render_live_progress(worker: BackgroundNotesWorker, total_needed: int):
     """Auto-refreshing fragment showing live progress + partial notes preview.
 

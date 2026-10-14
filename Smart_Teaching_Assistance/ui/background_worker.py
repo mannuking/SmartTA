@@ -458,12 +458,20 @@ class BackgroundLPWorker:
 
 
 def _fmt(secs: float) -> str:
-    """Format seconds → human-readable string like '2m 34s'."""
-    secs = max(0, int(secs))
+    """Format seconds -> human-readable string.
+
+    Sub-second precision below 60s so the live counter actually moves
+    (e.g. "21.4s" -> "21.9s" -> "22.3s") instead of freezing for a full
+    second on the int boundary.
+    """
+    secs = max(0.0, float(secs))
     if secs < 60:
-        return f"{secs}s"
-    m, s = divmod(secs, 60)
-    if m < 60:
+        # show 1 decimal for sub-minute timers so changes are visible immediately
+        return f"{secs:.1f}s"
+    total = int(secs)
+    if total < 3600:
+        m, s = divmod(total, 60)
         return f"{m}m {s:02d}s"
-    h, m = divmod(m, 60)
+    h, rem = divmod(total, 3600)
+    m, s = divmod(rem, 60)
     return f"{h}h {m:02d}m {s:02d}s"

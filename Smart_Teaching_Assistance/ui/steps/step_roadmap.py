@@ -42,16 +42,45 @@ def step_roadmap():
                 db = get_db(config)
                 ContentGenerator = get_content_generator()
                 gen = ContentGenerator(
-                    config.gemini_api_key, 
-                    db, 
+                    config.gemini_api_key,
+                    db,
                     model_name=config.gemini_model,
                     rotation_callback=rotate_api_key,
                     user_id=st.session_state.user_id
                 )
 
-                source = st.session_state.syllabus_text
-                if st.session_state.use_book_context and st.session_state.pdf_text:
-                    source += "\n\n--- BOOK CONTEXT ---\n" + st.session_state.pdf_text
+                # ── Build the source text ────────────────────────────
+                # Priority order:
+                #   1. RAG-retrieved excerpts from the uploaded PDF (if available)
+                #   2. Raw pdf_text (legacy / quick mode)
+                #   3. Just the syllabus
+                source_parts: list[str] = [st.session_state.syllabus_text]
+
+                if st.session_state.get("course_corpus") is not None:
+                    # Use RAG to pull the most relevant excerpts for this
+                    # subject. Creativity drops -- the user wants book-
+                    # faithful output, not LLM imagination.
+                    from Smart_Teaching_Assistance.ui.rag_bridge import get_rag_context
+                    rag_ctx = get_rag_context(
+                        st.session_state.subject_name,
+                        k_text=8, k_figures=2, rerank=True,
+                    )
+                    if rag_ctx.text_excerpts or rag_ctx.matching_figures:
+                        rag_block = rag_ctx.as_prompt_block()
+                        source_parts.append(
+                            "\n\n--- RELEVANT BOOK EXCERPTS (RAG-retrieved) ---\n"
+                            + rag_block
+                            + "\n\nINSTRUCTION: Stay faithful to the book excerpts above. "
+                            "Do NOT introduce topics that are not covered in the book. "
+                            "If the book doesn't cover a sub-topic, omit it."
+                        )
+                elif st.session_state.use_book_context and st.session_state.pdf_text:
+                    # Legacy: dump the whole PDF text
+                    source_parts.append(
+                        "\n\n--- BOOK CONTEXT ---\n" + st.session_state.pdf_text
+                    )
+
+                source = "\n\n".join(source_parts)
 
                 log_activity("Generating roadmap...", icon="🗺️", level="progress")
                 result = gen.generate_and_store_roadmap(

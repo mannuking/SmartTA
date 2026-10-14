@@ -42,6 +42,10 @@ def _defaults():
         use_book_context=False,
         pdf_hash=None,
         extracted_images=[],
+        # PDF-Extract-Kit RAG corpus (Phase A ingest output)
+        course_corpus=None,            # CourseCorpus pickle
+        courses_dir="",                # path on disk where chroma + corpus live
+        rag_ready=False,               # True after first successful index_corpus() call
         # Step 2 — Roadmap
         roadmap_generated=False,
         roadmap_text="", roadmap_tree={}, roadmap_structure={}, roadmap_id=None,

@@ -36,6 +36,15 @@ tqdm>=4.66.0
 #   - chromadb              : persistent local vector store
 #   - rank-bm25             : optional BM25 reranker (currently unused;
 #                             BGE-reranker-v2-m3 does the heavy lifting)
-sentence-transformers>=3.0.0
+#
+# Pinning note (Jan 2026 reality check):
+#   - sentence-transformers >=5.0 + transformers >=4.56 + datasets >=3
+#     + huggingface-hub <1.0 is the only combination that doesn't
+#     blow up with HfFolder / ResolvedRevision import errors.
+#     Keep this stanza pinned; do NOT let pip resolve to latest of all.
+sentence-transformers>=5.0.0
+transformers>=4.56.0,<6.0
+huggingface-hub>=0.30.0,<1.0
+datasets>=3.0.0
 chromadb>=0.5.0
 rank-bm25>=0.2.2

@@ -363,69 +363,37 @@ def _render_course_card(subj: str):
     has_lp = bool(st.session_state.get("lesson_plan_generated"))
     has_notes = bool(st.session_state.get("detailed_notes_generated"))
 
-    # Two rows of three, each is a quick-jump.
-    r1c1, r1c2, r1c3 = st.columns(3)
-    with r1c1:
-        if st.button(
-            "📋 Input",
-            key="qa_input",
-            use_container_width=True,
-            type="primary" if cur_step == 0 else "secondary",
-            disabled=cur_step == 0,
-        ):
-            go(0); st.rerun()
-    with r1c2:
-        if st.button(
-            "🗺️ Plan",
-            key="qa_roadmap",
-            use_container_width=True,
-            type="primary" if cur_step == 1 else "secondary",
-            disabled=not has_syllabus or cur_step == 1,
-            help="Generate a roadmap" if not has_syllabus else "Open Roadmap step",
-        ):
-            go(1); st.rerun()
-    with r1c3:
-        if st.button(
-            "📝 LP",
-            key="qa_lp",
-            use_container_width=True,
-            type="primary" if cur_step == 2 else "secondary",
-            disabled=not has_roadmap or cur_step == 2,
-            help="Generate a roadmap first" if not has_roadmap else "Open Lesson Plan step",
-        ):
-            go(2); st.rerun()
-
-    r2c1, r2c2, r2c3 = st.columns(3)
-    with r2c1:
-        if st.button(
-            "📖 Notes",
-            key="qa_notes",
-            use_container_width=True,
-            type="primary" if cur_step == 3 else "secondary",
-            disabled=not has_lp or cur_step == 3,
-            help="Generate a lesson plan first" if not has_lp else "Open Notes step",
-        ):
-            go(3); st.rerun()
-    with r2c2:
-        if st.button(
-            "🎯 Adapt",
-            key="qa_personalize",
-            use_container_width=True,
-            type="primary" if cur_step == 4 else "secondary",
-            disabled=not has_notes or cur_step == 4,
-            help="Generate notes first" if not has_notes else "Open Personalize step",
-        ):
-            go(4); st.rerun()
-    with r2c3:
-        if st.button(
-            "📤 Export",
-            key="qa_export",
-            use_container_width=True,
-            type="primary" if cur_step == 5 else "secondary",
-            disabled=not has_notes or cur_step == 5,
-            help="Generate notes first" if not has_notes else "Open Export step",
-        ):
-            go(5); st.rerun()
+    # The old 3-col layout (📋 I...  🗺️ P...  📝 LP / 📖 N...  🎯 A...  📤 E)
+    # truncated every label. Switched to 2-col layout with FULL labels
+    # so the user can read what each button does at a glance.
+    # 2 cols x 3 rows = 6 buttons; each column is wide enough for
+    # "Personalize" or "Detailed Notes" without truncation.
+    rows = [
+        [("📋 Input",       0,  cur_step == 0,  None),
+         ("🗺️ Roadmap",     1,  not has_syllabus or cur_step == 1,
+                              "Generate a syllabus first" if not has_syllabus else None)],
+        [("📝 Lesson Plan", 2,  not has_roadmap or cur_step == 2,
+                              "Generate a roadmap first" if not has_roadmap else None),
+         ("📖 Notes",       3,  not has_lp or cur_step == 3,
+                              "Generate a lesson plan first" if not has_lp else None)],
+        [("🎯 Personalize", 4,  not has_notes or cur_step == 4,
+                              "Generate notes first" if not has_notes else None),
+         ("📤 Export",      5,  not has_notes or cur_step == 5,
+                              "Generate notes first" if not has_notes else None)],
+    ]
+    for row in rows:
+        c1, c2 = st.columns(2)
+        for col, (label, step, disabled, disabled_help) in zip([c1, c2], row):
+            with col:
+                if st.button(
+                    label,
+                    key=f"qa_{step}",
+                    use_container_width=True,
+                    type="primary" if cur_step == step else "secondary",
+                    disabled=disabled,
+                    help=disabled_help,
+                ):
+                    go(step); st.rerun()
 
 
 def _render_device_toggle():

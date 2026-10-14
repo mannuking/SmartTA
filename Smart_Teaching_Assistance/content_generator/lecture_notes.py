@@ -319,15 +319,27 @@ Create the content now:
 
     # ── Robust JSON parser for LLM output ────────────────────────────────────
     def _parse_elements_json(self, raw: str, topic_id: str) -> List[Dict]:
-        """Parse LLM output into elements list with multiple recovery strategies."""
+        """Parse LLM output into elements list with multiple recovery strategies.
+
+        The parser walks 9 strategies in order. Each one returns either a
+        valid `elements` list or None. We return the first success.
+
+        Old behavior failed on Gemini responses that wrapped the JSON
+        inside prose like "Here is the structured output:\n```json\n{...}\n```\n
+        Let me know if you need more."  -- the outermost {..} would
+        include the trailing markdown fence, so json.loads threw. The
+        new strategies try balanced-brace extraction and markdown
+        fence stripping before giving up.
+        """
         if not raw or not raw.strip():
             return []
 
         cleaned = raw.strip()
-        # Strip markdown code fences (```json ... ``` or ``` ... ```)
-        cleaned = re.sub(r'^```(?:json)?\s*', '', cleaned)
-        cleaned = re.sub(r'```\s*$', '', cleaned)
-        cleaned = cleaned.strip()
+        # Strip ALL markdown code fences, not just outer ones. The
+        # model sometimes emits ```json on the first line and ``` on
+        # the last, but with explanatory prose before/after.
+        cleaned = re.sub(r"```(?:json|JSON)?\s*", "", cleaned)
+        cleaned = re.sub(r"```\s*", "", cleaned).strip()
 
         # Strategy 1: direct parse
         elements = self._try_parse_elements(cleaned, topic_id, "direct")
@@ -335,8 +347,8 @@ Create the content now:
             return elements
 
         # Strategy 2: find the outermost { ... } and parse
-        first_brace = cleaned.find('{')
-        last_brace = cleaned.rfind('}')
+        first_brace = cleaned.find("{")
+        last_brace = cleaned.rfind("}")
         if first_brace >= 0 and last_brace > first_brace:
             subset = cleaned[first_brace:last_brace + 1]
             elements = self._try_parse_elements(subset, topic_id, "brace-trim")
@@ -344,8 +356,8 @@ Create the content now:
                 return elements
 
         # Strategy 3: find the outermost [ ... ] (bare array)
-        first_bracket = cleaned.find('[')
-        last_bracket = cleaned.rfind(']')
+        first_bracket = cleaned.find("[")
+        last_bracket = cleaned.rfind("]")
         if first_bracket >= 0 and last_bracket > first_bracket:
             subset = cleaned[first_bracket:last_bracket + 1]
             try:
@@ -357,14 +369,290 @@ Create the content now:
                 pass
 
         # Strategy 4: fix common LLM JSON issues (trailing commas, unescaped newlines)
-        fixed = re.sub(r',\s*([}\]])', r'\1', cleaned)  # trailing commas
+        fixed = re.sub(r",\s*([}\]])", r"\1", cleaned)  # trailing commas
         elements = self._try_parse_elements(fixed, topic_id, "trailing-comma-fix")
         if elements is not None:
             return elements
 
-        # All strategies failed — convert raw text to clean readable elements
+        # Strategy 5: find the LAST balanced top-level {...} block.
+        # The model often adds prose before AND after the JSON, e.g.:
+        #   "Sure! Here is the JSON:\n{\"elements\":[...]} \nLet me know
+        #   if you need more."  The outer find() picks up the trailing
+        #   text, but the *last* balanced top-level object is the real
+        #   one. Walk back from the end, tracking brace depth, ignoring
+        #   characters inside strings.
+        elements = self._try_extract_last_balanced_object(cleaned, topic_id)
+        if elements is not None:
+            return elements
+
+        # Strategy 6: fix newlines inside string values. The model
+        # sometimes embeds literal "\n" inside JSON strings instead of
+        # the escape "\\n" -- which is invalid JSON. Replace literal
+        # newlines that sit inside quoted content with the escape.
+        elements = self._try_parse_elements(
+            self._fix_unescaped_newlines_in_strings(cleaned),
+            topic_id, "unescaped-newline-fix",
+        )
+        if elements is not None:
+            return elements
+
+        # Strategy 7: try balanced-brace scanning from the START.
+        # Walk forward tracking brace depth; the first time depth
+        # returns to 0 we have a candidate object. If that fails,
+        # continue to the next closing brace and try again.
+        elements = self._try_balanced_object_scan(cleaned, topic_id)
+        if elements is not None:
+            return elements
+
+        # Strategy 8: try the FIRST balanced {...} block, not the
+        # outermost. Sometimes the model emits an example template
+        # FIRST, then the real answer. The first balanced object is
+        # usually the real one.
+        elements = self._try_extract_first_balanced_object(cleaned, topic_id)
+        if elements is not None:
+            return elements
+
+        # Strategy 9: try the regex extraction of just the elements
+        # array. Pull out "elements": [ ... ] wherever it appears, even
+        # if the wrapping object is broken.
+        elements = self._try_extract_elements_array_only(cleaned, topic_id)
+        if elements is not None:
+            return elements
+
+        # All strategies failed -- convert raw text to clean readable elements
         logger.error(f"All JSON recovery failed for {topic_id}, converting to text")
         return self._raw_text_to_elements(raw)
+
+    @staticmethod
+    def _is_brace_balanced_at(s: str, end_idx: int) -> bool:
+        """Check if a substring s[:end_idx+1] has balanced braces outside strings.
+
+        Used to verify candidate substrings from balanced scans.
+        """
+        depth = 0
+        in_str = False
+        esc = False
+        for i, ch in enumerate(s):
+            if i > end_idx:
+                break
+            if in_str:
+                if esc:
+                    esc = False
+                elif ch == "\\":
+                    esc = True
+                elif ch == '"':
+                    in_str = False
+                continue
+            if ch == '"':
+                in_str = True
+            elif ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0 and i == end_idx:
+                    return True
+        return depth == 0 and end_idx == len(s) - 1 or False
+
+    def _try_extract_last_balanced_object(self, text: str, topic_id: str):
+        """Find the LAST top-level balanced {...} block in text and parse it."""
+        depth = 0
+        in_str = False
+        esc = False
+        candidates = []  # list of (start, end) substrings where depth returns to 0
+        start = -1
+        for i, ch in enumerate(text):
+            if in_str:
+                if esc:
+                    esc = False
+                elif ch == "\\":
+                    esc = True
+                elif ch == '"':
+                    in_str = False
+                continue
+            if ch == '"':
+                in_str = True
+            elif ch == "{":
+                if depth == 0:
+                    start = i
+                depth += 1
+            elif ch == "}":
+                if depth > 0:
+                    depth -= 1
+                if depth == 0 and start >= 0:
+                    candidates.append((start, i + 1))
+                    start = -1
+        if not candidates:
+            return None
+        for s, e in reversed(candidates):
+            sub = text[s:e]
+            elems = self._try_parse_elements(sub, topic_id, "last-balanced")
+            if elems is not None:
+                return elems
+        return None
+
+    def _try_extract_first_balanced_object(self, text: str, topic_id: str):
+        """Find the FIRST top-level balanced {...} block and parse it."""
+        depth = 0
+        in_str = False
+        esc = False
+        start = -1
+        for i, ch in enumerate(text):
+            if in_str:
+                if esc:
+                    esc = False
+                elif ch == "\\":
+                    esc = True
+                elif ch == '"':
+                    in_str = False
+                continue
+            if ch == '"':
+                in_str = True
+            elif ch == "{":
+                if depth == 0:
+                    start = i
+                depth += 1
+            elif ch == "}":
+                if depth > 0:
+                    depth -= 1
+                if depth == 0 and start >= 0:
+                    sub = text[start:i + 1]
+                    elems = self._try_parse_elements(sub, topic_id, "first-balanced")
+                    if elems is not None:
+                        return elems
+                    start = -1
+        return None
+
+    def _try_balanced_object_scan(self, text: str, topic_id: str):
+        """Walk all balanced objects, return the first that parses."""
+        depth = 0
+        in_str = False
+        esc = False
+        start = -1
+        for i, ch in enumerate(text):
+            if in_str:
+                if esc:
+                    esc = False
+                elif ch == "\\":
+                    esc = True
+                elif ch == '"':
+                    in_str = False
+                continue
+            if ch == '"':
+                in_str = True
+            elif ch == "{":
+                if depth == 0:
+                    start = i
+                depth += 1
+            elif ch == "}":
+                if depth > 0:
+                    depth -= 1
+                if depth == 0 and start >= 0:
+                    sub = text[start:i + 1]
+                    elems = self._try_parse_elements(sub, topic_id, "balanced-scan")
+                    if elems is not None:
+                        return elems
+                    start = -1
+        return None
+
+    def _try_extract_elements_array_only(self, text: str, topic_id: str):
+        """Try to find a "elements": [ ... ] block, even if the wrapping
+        object is broken. Useful when the LLM truncates mid-JSON.
+        """
+        # Find every "elements": [ ... ] and try each
+        idx = 0
+        while True:
+            key_pos = text.find('"elements"', idx)
+            if key_pos == -1:
+                break
+            # Find the opening [ after this key
+            bracket_pos = text.find("[", key_pos)
+            if bracket_pos == -1:
+                idx = key_pos + 1
+                continue
+            # Walk to matching ]
+            depth = 0
+            in_str = False
+            esc = False
+            end_pos = -1
+            for j in range(bracket_pos, len(text)):
+                ch = text[j]
+                if in_str:
+                    if esc:
+                        esc = False
+                    elif ch == "\\":
+                        esc = True
+                    elif ch == '"':
+                        in_str = False
+                    continue
+                if ch == '"':
+                    in_str = True
+                elif ch == "[":
+                    depth += 1
+                elif ch == "]":
+                    depth -= 1
+                    if depth == 0:
+                        end_pos = j + 1
+                        break
+            if end_pos > 0:
+                sub = text[bracket_pos:end_pos]
+                try:
+                    arr = json.loads(sub)
+                    if isinstance(arr, list):
+                        logger.warning(f"Recovered bare elements array for {topic_id}")
+                        return arr
+                except json.JSONDecodeError:
+                    # Try trailing-comma fix
+                    sub2 = re.sub(r",\s*([}\]])", r"\1", sub)
+                    try:
+                        arr = json.loads(sub2)
+                        if isinstance(arr, list):
+                            return arr
+                    except json.JSONDecodeError:
+                        pass
+            idx = key_pos + 1
+        return None
+
+    @staticmethod
+    def _fix_unescaped_newlines_in_strings(text: str) -> str:
+        """Replace literal newlines inside JSON string values with the
+        escape sequence (backslash-n). Only modifies text inside quoted
+        strings. Useful for Gemini responses that emit raw newlines in
+        string content instead of escaping them.
+        """
+        # Use chr() to avoid having literal escape characters in the
+        # source which can confuse the patch tool / editors.
+        NL = chr(10)   # \n
+        CR = chr(13)   # 
+        TAB = chr(9)   # \t
+        BS = chr(92)   # \
+
+        out = []
+        in_str = False
+        esc = False
+        for ch in text:
+            if in_str:
+                if esc:
+                    esc = False
+                    out.append(ch)
+                elif ch == BS:
+                    esc = True
+                    out.append(ch)
+                elif ch == '"':
+                    in_str = False
+                    out.append(ch)
+                elif ch == NL:
+                    out.append(BS + "n")
+                elif ch == CR:
+                    out.append(BS + "r")
+                elif ch == TAB:
+                    out.append(BS + "t")
+                else:
+                    out.append(ch)
+            else:
+                if ch == '"':
+                    in_str = True
+                out.append(ch)
+        return "".join(out)
 
     @staticmethod
     def _try_parse_elements(text: str, topic_id: str, strategy: str) -> Optional[List[Dict]]:

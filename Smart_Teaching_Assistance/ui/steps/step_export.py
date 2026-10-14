@@ -2,6 +2,7 @@
 
 import streamlit as st
 import json
+import time as _time
 
 from Smart_Teaching_Assistance.ui.steps._shared import (
     get_config, get_db, get_content_generator, get_export_manager,
@@ -9,11 +10,189 @@ from Smart_Teaching_Assistance.ui.steps._shared import (
 )
 
 
+def _ensure_notes_for_export():
+    """Make sure the session has something exportable.
+
+    The user may have arrived at Step 6 via "Skip to Export" from
+    Step 4, or via direct navigation. In those cases `detailed_notes`
+    might be missing even though the lesson plan IS in session. We
+    auto-generate the notes on-the-fly using the same path as Step 4
+    (but synchronously, not the background-worker variant, so the
+    export page can render right after).
+
+    If we don't even have a lesson plan yet, we build a minimal
+    exportable structure from the roadmap text -- it's not as rich
+    as proper notes, but it gives the user SOMETHING to download
+    instead of a hard "Generate notes first" wall.
+    """
+    if st.session_state.get("detailed_notes_generated"):
+        return  # already good
+
+    has_lesson_plan = bool(st.session_state.get("lesson_plan"))
+
+    # Live progress card so the user sees what's happening
+    progress = st.empty()
+    started = _time.time()
+
+    def _render(phase: str, msg: str = "", frac: float = 0.1):
+        elapsed = int(_time.time() - started)
+        mm, ss = divmod(elapsed, 60)
+        progress.markdown(
+            f"""
+            <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+                        border: 1px solid #334155; border-radius: 12px;
+                        padding: 1.25rem 1.5rem; margin: 0.5rem 0 1rem 0;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div style="width: 14px; height: 14px; border-radius: 50%;
+                            background: #38bdf8; box-shadow: 0 0 0 0 rgba(56,189,248,0.7);
+                            animation: smartta-pulse 1.5s infinite;"></div>
+                <div style="color: #f1f5f9; font-weight: 600; font-size: 1.05rem;">
+                  Preparing export
+                </div>
+                <div style="margin-left: auto; color: #94a3b8; font-family: monospace; font-size: 0.95rem;">
+                  ⏱ {mm:02d}:{ss:02d}
+                </div>
+              </div>
+              <div style="color: #cbd5e1; font-size: 0.9rem; margin-bottom: 0.75rem;">
+                {phase}{(' — ' + msg) if msg else ''}
+              </div>
+              <div style="background: #1e293b; border-radius: 6px; overflow: hidden; height: 6px;">
+                <div style="background: linear-gradient(90deg, #38bdf8, #818cf8);
+                            height: 100%; width: {frac*100:.0f}%;
+                            transition: width 0.5s ease;"></div>
+              </div>
+            </div>
+            <style>
+              @keyframes smartta-pulse {{
+                0%   {{ box-shadow: 0 0 0 0 rgba(56,189,248,0.7); }}
+                70%  {{ box-shadow: 0 0 0 12px rgba(56,189,248,0); }}
+                100% {{ box-shadow: 0 0 0 0 rgba(56,189,248,0); }}
+              }}
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    try:
+        if has_lesson_plan:
+            # We have a lesson plan -> generate notes synchronously
+            _render("📝 Generating notes from your lesson plan", "this takes a few seconds", 0.15)
+            config = get_config()
+            db = get_db(config)
+            ContentGenerator = get_content_generator()
+            gen = ContentGenerator(
+                config.gemini_api_key,
+                db,
+                model_name=config.gemini_model,
+                user_id=st.session_state.user_id,
+            )
+
+            from Smart_Teaching_Assistance.ui.rag_bridge import get_rag_context
+            rag_ctx = get_rag_context(
+                st.session_state.subject_name,
+                k_text=8, k_figures=2, rerank=True,
+            )
+            rag_block = rag_ctx.as_prompt_block() if (
+                rag_ctx.text_excerpts or rag_ctx.matching_figures
+            ) else ""
+
+            _render("🤖 Calling AI for each topic", "stay on this page", 0.4)
+            # The real entry point is generate_detailed_notes_recursive.
+            # It returns (notes_data, answer_key_text).
+            highlight_list = []
+            highlights = st.session_state.get("highlighted_topics_input", "")
+            if highlights:
+                highlight_list = [h.strip() for h in highlights.split(",") if h.strip()]
+
+            def _book_context_for(topic_id: str, topic_title: str) -> str:
+                # Re-pull RAG context for each topic so the per-topic
+                # prompt has the most relevant book excerpts.
+                try:
+                    sub_ctx = get_rag_context(
+                        topic_title or topic_id,
+                        section_id=topic_id,
+                        k_text=5, k_figures=2, rerank=True,
+                    )
+                    return sub_ctx.as_prompt_block()
+                except Exception:
+                    return ""
+
+            notes_data, answer_key = gen.generate_detailed_notes_recursive(
+                lesson_plan=st.session_state.lesson_plan,
+                subject=st.session_state.subject_name,
+                difficulty=st.session_state.get("difficulty", "Undergraduate"),
+                highlights=highlight_list,
+                temperature=0.7,
+                existing_notes=st.session_state.get("all_notes_data") or None,
+                roadmap_tree=st.session_state.get("roadmap_tree") or None,
+                book_context_fn=_book_context_for,
+            )
+            st.session_state.all_notes_data = notes_data
+            if answer_key:
+                st.session_state.answer_key_text = answer_key
+            st.session_state.detailed_notes_generated = True
+            _render("✅ Notes ready", f"loaded {len(notes_data)} topic blocks", 1.0)
+            progress.empty()
+            log_activity(
+                f"Auto-generated notes on Skip-to-Export: {len(notes_data)} topics",
+                icon="📝", level="success",
+            )
+            return
+
+        # No lesson plan either. Build a minimal exportable structure
+        # from the roadmap text so the user gets a real file.
+        if st.session_state.get("roadmap_text"):
+            _render("📋 Building a quick export from your roadmap", "no lesson plan yet", 0.3)
+            # Convert roadmap_text into a single-topic notes structure
+            # so ExportManager can produce a real PDF/DOCX.
+            from Smart_Teaching_Assistance.ui.notes_from_roadmap import (
+                build_notes_from_roadmap,
+            )
+            notes_data = build_notes_from_roadmap(
+                st.session_state.roadmap_text,
+                st.session_state.subject_name,
+            )
+            st.session_state.all_notes_data = notes_data
+            st.session_state.detailed_notes_generated = True
+            _render("✅ Quick export ready", f"from roadmap ({len(notes_data)} topic(s))", 1.0)
+            progress.empty()
+            log_activity(
+                f"Built quick export from roadmap (no lesson plan): "
+                f"{len(notes_data)} topic(s)",
+                icon="📋", level="info",
+            )
+            return
+
+        # Nothing at all to export
+        progress.empty()
+        st.error(
+            "❌ Nothing to export yet. Go back to **Step 1** to set up a "
+            "subject and syllabus, then return here."
+        )
+        nav_buttons(next_=False, back_step=4)
+        return False
+    except Exception as e:
+        progress.empty()
+        st.error(
+            f"❌ Auto-generation failed: {e}\n\n"
+            f"You can go back to **Step 4 (Detailed Notes)** and click "
+            f"\"Generate Notes\" manually."
+        )
+        log_error(f"Auto-generate-on-skip failed: {e}")
+        logger.exception("auto-generate notes failed")
+        return False
+    return True
+
+
 def step_export():
     if not st.session_state.detailed_notes_generated:
-        st.warning("⚠️ Generate notes first.")
-        nav_buttons(next_=False, back_step=4)
-        return
+        # Try to auto-generate. If even that fails, the function above
+        # already showed an error and we should bail.
+        ok = _ensure_notes_for_export()
+        if not ok or not st.session_state.detailed_notes_generated:
+            return
+        # Otherwise: we have notes now, fall through to the export UI.
 
     st.markdown("Download your full course package with all generated materials.")
     ContentGenerator = get_content_generator()

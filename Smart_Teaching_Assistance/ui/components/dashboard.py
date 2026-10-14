@@ -55,8 +55,18 @@ def render_dashboard():
         st.markdown("### 📚 My Courses")
     with c2:
         if st.button("➕ Create New Course", type="primary", use_container_width=True):
+            # 1) wipe in-memory session (back to defaults incl. step=-1)
+            # 2) reset_session() sets _user_bypassed_autoload=True so
+            #    the next render's autoload check bails (otherwise the
+            #    most-recent course would silently reload before the
+            #    user can fill out Step 1)
+            # 3) set step=0 so the next render lands on Step 1
+            # 4) clear the bypass flag -- the user has committed to
+            #    creating a new course, so future visits to the
+            #    Dashboard SHOULD auto-load the most recent one.
             reset_session()
-            st.session_state.step = 0
+            st.session_state["step"] = 0
+            st.session_state["_user_bypassed_autoload"] = False
             st.rerun()
 
     if not courses:
@@ -84,6 +94,10 @@ def render_dashboard():
                 with btn_cols[0]:
                     if st.button("🚀 Resume", key=f"resume_{c['id']}", use_container_width=True):
                         if load_course_state(c['id']):
+                            # User explicitly chose a course -- clear
+                            # the bypass so the next visit to the
+                            # Dashboard auto-loads again as expected.
+                            st.session_state["_user_bypassed_autoload"] = False
                             st.rerun()
                 with btn_cols[1]:
                     if st.button("🗑️", key=f"del_{c['id']}", use_container_width=True):

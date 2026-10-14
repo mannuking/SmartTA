@@ -354,6 +354,10 @@ def _render_footer():
             key="sb_reset",
             help="Clear the current course and return to the Dashboard so you can start a new pipeline from Step 1.",
         ):
+            # reset_session() sets _user_bypassed_autoload=True, so
+            # the next render's autoload check bails and the user
+            # actually sees an empty Dashboard instead of the most
+            # recent course re-loading behind their back.
             reset_session()
             st.session_state["step"] = -1   # back to Dashboard
             st.rerun()

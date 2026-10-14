@@ -92,12 +92,15 @@ def _defaults():
         user_id=None,                     # For multi-tenancy
         username=None,
         auth_token=None,
-        _skip_autoload_once=False,        # Set by Reset to suppress the
-                                          # next _auto_load_last_course() call
-                                          # (otherwise the user clicks Reset
-                                          # and the most recent course
-                                          # re-loads, making it look like
-                                          # nothing happened).
+        _user_bypassed_autoload=False,    # Set by Reset and "Create New
+                                          # Course". When True, the
+                                          # Dashboard will show the
+                                          # course list without auto-
+                                          # loading the most recent one.
+                                          # The flag is cleared once the
+                                          # user explicitly clicks a
+                                          # course card or finishes
+                                          # creating a new one.
     )
 
 def init_state():
@@ -220,14 +223,26 @@ def _load_global_settings():
 
 
 def _auto_load_last_course():
-    """Auto-load the last active course for the logged-in user."""
-    if st.session_state.get("_skip_autoload_once"):
-        # Reset/Clear was just clicked -- honor it, don't re-load the
-        # last course behind the user's back.
-        st.session_state["_skip_autoload_once"] = False
+    """Auto-load the last active course for the logged-in user.
+
+    Skipped if:
+      - step != -1 (user is mid-pipeline -- respect that, don't override)
+      - course_id is already set (already loaded)
+      - subject_name is set (unsaved in-progress course)
+      - _user_bypassed_autoload is True (the user just clicked Reset
+        or "Create New Course" -- they want a clean Dashboard)
+
+    The last guard is the fix for the "Reset / Create New Course is
+    a no-op" bug: the previous implementation auto-loaded on every
+    Dashboard render, so even after reset_session() cleared state,
+    the next render would reload the most-recent course behind the
+    user's back.
+    """
+    if st.session_state.get("_user_bypassed_autoload"):
+        return
+    if st.session_state.get("step") != -1:
         return
     if st.session_state.get("course_id") is not None:
-        # Already loaded
         _reconnect_workers(st.session_state.course_id)
         return
     if st.session_state.get("subject_name"):
@@ -457,6 +472,10 @@ def load_course_state(course_id):
             st.session_state[k] = v
         st.session_state.course_id = row["id"]
         st.session_state.step = row["current_step"]
+        # User explicitly chose this course -- clear any pending
+        # autoload-bypass so the Dashboard's auto-load behavior
+        # resumes on the next visit.
+        st.session_state["_user_bypassed_autoload"] = False
         return True
     return False
 
@@ -469,17 +488,29 @@ def delete_course(course_id):
             st.session_state[k] = v
 
 def reset_session():
-    """Wipe the in-memory session and skip the next auto-load.
+    """Wipe the in-memory session and mark "user bypassed autoload".
 
-    This is what the sidebar's "Reset" button calls. After Reset, the
-    user expects to see a clean slate -- NOT the most recent course
-    re-loaded by _auto_load_last_course() on the next rerun. So we
-    set _skip_autoload_once=True; init_state consumes the flag and
-    leaves the session empty.
+    After Reset, the user expects to land on an empty Dashboard --
+    not to have the most-recent course silently re-loaded on the next
+    render. So we set _user_bypassed_autoload=True. The flag is
+    cleared automatically the next time the user does ANY of:
+      - clicks a course card to load it
+      - clicks "Create New Course" and lands on Step 1
+      - completes a new course (subject_name is set)
     """
     for k, v in _defaults().items():
         st.session_state[k] = v
-    st.session_state["_skip_autoload_once"] = True
+    st.session_state["_user_bypassed_autoload"] = True
+
+
+def clear_autoload_bypass():
+    """Clear the _user_bypassed_autoload flag.
+
+    Call this once the user has committed to a new path (clicked a
+    course card, or is on Step 1 starting a fresh pipeline) so the
+    Dashboard will resume auto-loading on future visits.
+    """
+    st.session_state["_user_bypassed_autoload"] = False
 
 
 # ── Sidebar Activity Log Helpers ─────────────────────────────────────────────

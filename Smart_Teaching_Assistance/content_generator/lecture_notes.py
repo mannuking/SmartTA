@@ -55,8 +55,15 @@ class LectureNotesMixin:
                                     length_budget: Optional[Dict] = None,
                                     covered_concepts: Optional[List[str]] = None,
                                     section_mega_prompt: Optional[str] = None,
-                                    coverage_contract: Optional[Dict] = None) -> str:
-        """Build the rich lecture notes generation prompt using Standard Markdown."""
+                                    coverage_contract: Optional[Dict] = None,
+                                    book_context: Optional[str] = None) -> str:
+        """Build the rich lecture notes generation prompt using Standard Markdown.
+
+        New: `book_context` is an optional RAG-retrieved string of book
+        excerpts and figure captions, pulled per topic by the caller (the
+        Streamlit step). When present, the LLM is explicitly told to stay
+        faithful to it instead of improvising.
+        """
         prompt = f"""You are a World-Class Textbook Author writing the definitive guide on {subject}.
 Your goal is to write a CHAPTER SECTION that is part of a continuous, cohesive narrative.
 
@@ -70,6 +77,19 @@ Lesson Plan Context:
 {plan_content}
 ---
 """
+        if book_context:
+            prompt += (
+                "\n📚 BOOK CONTEXT (RAG-retrieved from the user's uploaded textbook):\n"
+                "---\n"
+                f"{book_context}\n"
+                "---\n"
+                "INSTRUCTION: The excerpts above are pulled from the user's textbook. "
+                "STAY FAITHFUL to them. Use the same terminology, examples, and "
+                "depth of explanation. Cite specific page numbers where helpful "
+                "(e.g. 'p.47 of the book'). If the excerpts don't cover a sub-topic, "
+                "say so explicitly rather than inventing content.\n"
+            )
+
         if section_mega_prompt:
             prompt += (
                 "\nSECTION MEGA PROMPT (teacher-approved guidance; follow this strictly):\n"
@@ -229,8 +249,13 @@ Create the content now:
                                     previous_context: Optional[str] = None,
                                     global_context: Optional[str] = None,
                                     length_budget: Optional[Dict] = None,
-                                    covered_concepts: Optional[List[str]] = None) -> List[Dict]:
-        """Generate lecture notes for a single topic node."""
+                                    covered_concepts: Optional[List[str]] = None,
+                                    book_context: Optional[str] = None) -> List[Dict]:
+        """Generate lecture notes for a single topic node.
+
+        `book_context` is the per-topic RAG-retrieved string from the
+        uploaded textbook (see Smart_Teaching_Assistance.rag.retriever).
+        """
         entry = self._find_lesson_plan_entry(lesson_plan, topic_id)
         if not entry:
             logger.error(f"Could not find lesson plan entry for {topic_id}")
@@ -248,6 +273,7 @@ Create the content now:
             covered_concepts=covered_concepts,
             section_mega_prompt=section_mega_prompt,
             coverage_contract=coverage_contract,
+            book_context=book_context,
         )
         try:
             raw = self._generate_text(prompt, temperature, f"notes_{topic_id}")
@@ -395,6 +421,7 @@ Create the content now:
         existing_notes: Optional[List[Dict]] = None,
         roadmap_tree: Optional[Dict] = None,
         partial_update_cb: Optional[Callable] = None,
+        book_context_fn: Optional[Callable[[str, str], str]] = None,
     ) -> Tuple[List[Dict], Optional[str]]:
         """
         Recursively generate detailed lecture notes with continuous narrative flow,
@@ -467,13 +494,25 @@ Create the content now:
                     if progress_cb:
                         progress_cb(counter[0], total, f"Loaded: {topic_id} — {item.get('title', '')}")
                 else:
+                    # Per-topic RAG lookup. The callback returns a string
+                    # (RAG-retrieved book context) or empty if the user
+                    # didn't upload a PDF. Cheap because the index is in
+                    # memory; the call is <100ms per topic.
+                    book_ctx = ""
+                    if book_context_fn is not None:
+                        try:
+                            book_ctx = book_context_fn(topic_id, item.get("title", "")) or ""
+                        except Exception as e:
+                            logger.debug(f"book_context_fn failed for {topic_id}: {e}")
+                            book_ctx = ""
                     elements = self.generate_lecture_notes_chunk(
                         lesson_plan, topic_id, subject, difficulty,
                         highlights, parent_ctx, child_topics, temperature,
                         previous_context=prev_ctx_str,
                         global_context=global_ctx,
                         length_budget=length_budget,
-                        covered_concepts=covered_concepts if covered_concepts else None
+                        covered_concepts=covered_concepts if covered_concepts else None,
+                        book_context=book_ctx,
                     )
 
                 if elements:

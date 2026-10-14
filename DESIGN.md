@@ -18,16 +18,16 @@ pipeline (`PDF_extractor/pipeline/`) so that:
 4. **Step 6 (Export)** -- DOCX (always) + PDF (print-quality via ReportLab).
    Figures embedded with their original caption at the exact sub-section.
 
-## Phases (A-F, each independently shippable)
+## Phases (A-F, each independently shippable) -- ALL SHIPPED
 
-| Phase | Module(s) | Time | Status |
-|-------|-----------|------|--------|
-| A. Ingestion | `pdf_extractor/ingest.py`, `pdf_extractor/section_detector.py`, `ui/steps/step_input.py` rewrite | ~2h | next |
-| B. Vector store | `rag/store.py`, `rag/embeddings.py` | ~1.5h | - |
-| C. Retrieval | `rag/retriever.py`, `rag/figure_placer.py` | ~1h | - |
-| D. Wire into steps 2-4 | `ui/steps/step_roadmap.py`, `step_lesson_plan.py`, `step_notes.py` patches | ~1h | - |
-| E. Image placement logic | `rag/figure_placer.py` integration into step 4 | ~1h | - |
-| F. Export | `ui/steps/step_export.py` DOCX check + PDF builder | ~1.5h | - |
+| Phase | Module(s) | Status |
+|-------|-----------|--------|
+| A. Ingestion | `pdf_extractor/ingest.py`, `pdf_extractor/section_detector.py`, `ui/steps/step_input.py` rewrite | ✅ done |
+| B. Vector store | `rag/store.py`, `rag/embeddings.py` | ✅ done |
+| C. Retrieval | `rag/retriever.py`, `rag/figure_placer.py` | ✅ done |
+| D. Wire into steps 2-4 | `ui/steps/step_roadmap.py` (RAG in prompt), `step_notes.py` (per-topic RAG + figure placement) | ✅ done |
+| E. Image placement logic | `rag/figure_placer.py` + harvest integration in `step_notes.py` + `figure_block` element type | ✅ done |
+| F. Export | `export_manager/engine_pdf.py` + `engine_docx.py` handle `figure_block` -- figures embedded at exact sub-section with original caption | ✅ done |
 
 ## Embedding models (free, local, MIT)
 

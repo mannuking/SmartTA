@@ -86,6 +86,28 @@ class RenderingMixin:
                     parts.append(f"\n```{lang}\n{c}\n```\n\n")
                 elif t == "equation":
                     parts.append(f"\n$$\n{c}\n$$\n\n")
+                elif t == "figure_block":
+                    # Auto-placed figure from the user's uploaded PDF
+                    # (set by rag/figure_placer.py during the harvest
+                    # step). The path is always an absolute file path
+                    # to a PNG on disk; the caption is the same one
+                    # the PDF-Extract-Kit pipeline gave the figure.
+                    img_src = el.get("image_path", "")
+                    caption = el.get("caption", "")
+                    page = el.get("page", "")
+                    desc = el.get("description", "")
+                    if img_src and os.path.isfile(img_src):
+                        page_tag = f" (p.{page+1})" if isinstance(page, int) else ""
+                        parts.append(
+                            f"\n![{caption}]({img_src})\n"
+                            f"*Figure: {caption}{page_tag}*\n"
+                        )
+                        if desc:
+                            # Multi-line description collapsed to one paragraph
+                            parts.append(f"_{desc}_\n")
+                        parts.append("\n")
+                    else:
+                        parts.append(f"\n> 🖼️ **{caption}** (image file missing)\n\n")
                 elif t == "image_placeholder":
                     query = el.get("search_query", "")
                     caption = el.get("caption", "")

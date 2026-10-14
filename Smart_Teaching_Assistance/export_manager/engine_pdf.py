@@ -57,7 +57,9 @@ class PdfEngine:
             safe_subject = re.sub(r'[^\w\s-]', '', subject)[:50]
             filename = f"Full_Course_{safe_subject}_{timestamp}.pdf"
             output_path = Path("outputs") / filename
-        
+        else:
+            output_path = Path(output_path)
+
         output_path.parent.mkdir(parents=True, exist_ok=True)
         doc = SimpleDocTemplate(str(output_path), pagesize=letter)
         styles = getSampleStyleSheet()
@@ -260,6 +262,42 @@ class PdfEngine:
                         story.append(Paragraph(f"<font color='gray'><i>Figure: {escape_xml(el.get('caption'))}</i></font>", styles['Normal']))
                 except Exception as e:
                     logger.error(f"Failed to insert image into PDF: {e}")
+        elif etype == "figure_block":
+            # PDF-Extract-Kit figure auto-placed in the notes via RAG.
+            # image_path is an absolute path to a PNG the ingest pipeline
+            # already cropped from the user's PDF -- no download needed.
+            # The caption is the exact caption the pipeline assigned, so
+            # the printed figure matches the source verbatim.
+            img_path = el.get("image_path", "")
+            caption = el.get("caption", "") or "Figure"
+            description = el.get("description", "")
+            page = el.get("page")
+            if img_path and os.path.isfile(img_path):
+                try:
+                    img = RLImage(img_path, width=5.0*inch, height=3.5*inch, kind='proportional')
+                    story.append(Spacer(1, 0.12*inch))
+                    story.append(img)
+                    page_tag = f" (extracted from p.{page+1})" if isinstance(page, int) else ""
+                    story.append(Paragraph(
+                        f"<font color='gray'><i>Figure: {escape_xml(caption)}{escape_xml(page_tag)}</i></font>",
+                        styles['Normal']
+                    ))
+                    if description:
+                        story.append(Paragraph(
+                            f"<font color='dimgray'><i>{escape_xml(description)}</i></font>",
+                            styles['Normal']
+                        ))
+                    story.append(Spacer(1, 0.12*inch))
+                except Exception as e:
+                    logger.error(f"Failed to insert figure_block into PDF: {e}")
+            else:
+                # Image file went missing (cleaned up, etc.) -- still
+                # print the caption so the document is informative.
+                page_tag = f" (p.{page+1})" if isinstance(page, int) else ""
+                story.append(Paragraph(
+                    f"<font color='gray'>[Figure: {escape_xml(caption)}{escape_xml(page_tag)} - image file not available]</font>",
+                    styles['Normal']
+                ))
         elif etype == "source_citation":
             p = Paragraph(f"<font color='gray'><i>Source: {pdf_safe(content)}</i></font>", styles['Normal'])
             p.hAlign = 'RIGHT'

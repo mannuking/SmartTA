@@ -315,6 +315,49 @@ class DocxEngine:
                     if is_temp and temp_img_path:
                         try: os.remove(temp_img_path)
                         except: pass
+        elif etype == "figure_block":
+            # PDF-Extract-Kit figure auto-placed in the notes via RAG.
+            # No download needed -- image_path is already on disk.
+            img_path = element.get("image_path", "")
+            caption = element.get("caption", "") or "Figure"
+            description = element.get("description", "")
+            page = element.get("page")
+            if img_path and os.path.isfile(img_path):
+                p = doc.add_paragraph()
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                converted_path = ensure_docx_compatible(img_path)
+                try:
+                    run = p.add_run()
+                    run.add_picture(converted_path, width=Inches(5.0))
+                    page_tag = f" (extracted from p.{page+1})" if isinstance(page, int) else ""
+                    cap_p = doc.add_paragraph()
+                    cap_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    cap_run = cap_p.add_run(f"Figure: {caption}{page_tag}")
+                    cap_run.italic = True
+                    cap_run.font.size = Pt(9)
+                    cap_run.font.color.rgb = RGBColor(0x55, 0x55, 0x55)
+                    if description:
+                        desc_p = doc.add_paragraph()
+                        desc_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        desc_run = desc_p.add_run(description)
+                        desc_run.italic = True
+                        desc_run.font.size = Pt(8)
+                        desc_run.font.color.rgb = RGBColor(0x77, 0x77, 0x77)
+                except Exception as e:
+                    logger.error(f"Failed to insert figure_block into DOCX: {e}")
+                finally:
+                    if converted_path != img_path:
+                        try: os.remove(converted_path)
+                        except: pass
+            else:
+                # Image file gone -- still print the caption
+                page_tag = f" (p.{page+1})" if isinstance(page, int) else ""
+                cap_p = doc.add_paragraph()
+                cap_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                cap_run = cap_p.add_run(f"[Figure: {caption}{page_tag} - image file not available]")
+                cap_run.italic = True
+                cap_run.font.size = Pt(9)
+                cap_run.font.color.rgb = RGBColor(0x77, 0x77, 0x77)
         elif etype == "source_citation":
             p = doc.add_paragraph()
             p.alignment = WD_ALIGN_PARAGRAPH.RIGHT

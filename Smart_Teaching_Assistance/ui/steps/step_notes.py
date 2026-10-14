@@ -184,6 +184,29 @@ def _start_background_generation(total_needed: int, highlights: str, llm_temp: f
         partial_update_cb=worker.update_partial,
     )
 
+    # If the user uploaded a PDF and we have a RAG corpus, thread a
+    # book_context callback through so each topic's notes generation
+    # gets a RAG-retrieved string of book excerpts + figure captions.
+    if st.session_state.get("course_corpus") is not None:
+        from Smart_Teaching_Assistance.ui.rag_bridge import get_rag_context
+        # Capture by value (not reference) -- the lambda must be a
+        # top-level closure on a snapshot, not a ref to live session.
+        _has_rag = True
+        def _book_context_for(topic_id: str, topic_title: str) -> str:
+            if not _has_rag:
+                return ""
+            try:
+                rag_ctx = get_rag_context(
+                    topic_title or topic_id,
+                    section_id=topic_id,
+                    k_text=5, k_figures=2, rerank=True,
+                )
+                return rag_ctx.as_prompt_block()
+            except Exception as e:
+                logger.debug(f"RAG lookup for {topic_id} failed: {e}")
+                return ""
+        gen_kwargs["book_context_fn"] = _book_context_for
+
     # Clear guards for the new generation
     st.session_state.pop("_notes_terminal_rerun", None)
     st.session_state.pop("_global_terminal_rerun", None)
@@ -256,6 +279,32 @@ def _sync_worker_to_session(worker: BackgroundNotesWorker, total_needed: int):
             # rolled into parents by the generator. The user has every
             # note we have; this just avoids the "Partial: N/M" trap.
             st.session_state.detailed_notes_generated = True
+
+            # If the user uploaded a PDF, auto-place the best-matching
+            # extracted figure at each sub-section (via CLIP cosine sim).
+            # Mutates `all_notes` in place to add `figure_block` elements.
+            if st.session_state.get("course_corpus") is not None:
+                try:
+                    from Smart_Teaching_Assistance.ui.rag_bridge import place_figures_into_notes
+                    all_notes = place_figures_into_notes(all_notes)
+                    st.session_state.all_notes_data = all_notes
+                    # Also rebuild the markdown so the figure captions
+                    # appear in the on-screen view immediately.
+                    st.session_state.notes_markdown = ContentGenerator.elements_to_markdown(
+                        all_notes, answer_key
+                    )
+                    placed = sum(
+                        1 for n in all_notes for e in n.get("elements", [])
+                        if e.get("type") == "figure_block"
+                    )
+                    if placed:
+                        log_activity(
+                            f"Placed {placed} figure(s) from the uploaded PDF into the notes.",
+                            icon="🖼️", level="success",
+                        )
+                except Exception as e:
+                    logger.warning(f"figure placement failed: {e}")
+
             save_course_state()
             set_generation_status("idle")
 

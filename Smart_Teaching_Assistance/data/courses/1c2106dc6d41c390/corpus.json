@@ -1,0 +1,2193 @@
+{
+  "pdf_hash": "1c2106dc6d41c390",
+  "pdf_path": "E:\\Projects\\PDF_extractor\\PDF-Extract-Kit\\HOPCROFT_AND_ULLMAN.pdf",
+  "pdf_filename": "HOPCROFT_AND_ULLMAN.pdf",
+  "created_at": 1792014969.2915554,
+  "total_pages": 550,
+  "num_figures": 141,
+  "num_text_chunks": 651,
+  "section_tree": {
+    "T1": {
+      "title": "TITLE",
+      "page_start": 1,
+      "children": {}
+    },
+    "T2": {
+      "title": "1. Automata: The Methods and the Madness",
+      "page_start": 17,
+      "children": {}
+    },
+    "T3": {
+      "title": "2. Finite Automata",
+      "page_start": 53,
+      "children": {}
+    },
+    "T4": {
+      "title": "3. Regular Expressions and Languages",
+      "page_start": 101,
+      "children": {}
+    },
+    "T5": {
+      "title": "4. Properties of Regular Languages",
+      "page_start": 143,
+      "children": {}
+    },
+    "T6": {
+      "title": "5. Context Free Grammars and Languages",
+      "page_start": 187,
+      "children": {}
+    },
+    "T7": {
+      "title": "6. Pushdown Automata",
+      "page_start": 241,
+      "children": {}
+    },
+    "T8": {
+      "title": "7. Properties of Context Free Languages",
+      "page_start": 277,
+      "children": {}
+    },
+    "T9": {
+      "title": "8. Introduction to Turing Machines",
+      "page_start": 331,
+      "children": {}
+    },
+    "T10": {
+      "title": "9. Undecidability",
+      "page_start": 393,
+      "children": {}
+    },
+    "T11": {
+      "title": "10. Intractable Problems",
+      "page_start": 441,
+      "children": {}
+    },
+    "T12": {
+      "title": "11. Additional Classes of Problems",
+      "page_start": 499,
+      "children": {}
+    },
+    "T13": {
+      "title": "Index",
+      "page_start": 542,
+      "children": {}
+    }
+  },
+  "figures": [
+    {
+      "id": "fig-p18-c0",
+      "page": 18,
+      "bbox": [
+        373.0,
+        443.9,
+        598.2,
+        594.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page18_figure_6.png",
+      "caption": "Finite state machine for light switch",
+      "description": "This state diagram illustrates a simple finite state machine modeling a push-button toggle switch with two states: \"off\" and \"on\". The initial state is indicated by an incoming arrow pointing to the \"off\" circle. A directed edge labeled \"Push\" connects the \"off\" state to the \"on\" state, while another directed edge labeled \"Push\" returns the system from the \"on\" state back to the \"off\" state. This cyclical relationship demonstrates how a single repeated input event alternates the system between its two binary configurations.",
+      "section_id": "T2",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p19-c1",
+      "page": 19,
+      "bbox": [
+        254.1,
+        224.1,
+        716.0,
+        289.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page19_figure_5.png",
+      "caption": "Finite state automaton recognizing word then",
+      "description": "This diagram illustrates a deterministic finite automaton designed to recognize the specific keyword 'then'. It consists of a linear sequence of six states connected by directed edges, where each transition is labeled with a successive character of the target string. The start state initiates the process, and progress through intermediate states accumulates prefixes 't', 'th', and 'the' until the final double-circled accepting state confirms the complete word.",
+      "section_id": "T2",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p38-c2",
+      "page": 38,
+      "bbox": [
+        321.1,
+        859.3,
+        650.4,
+        1060.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page38_figure_3.png",
+      "caption": "General tree structure with root node",
+      "description": "This diagram illustrates a general tree data structure, featuring a single root node labeled N positioned at the top. Descending from the root node are k separate subtrees, denoted as T1, T2 through Tk, represented by triangular shapes indicating internal hierarchical complexity. The ellipsis between the second and final subtrees denotes an arbitrary number of intermediate branches in the multi-way tree hierarchy.",
+      "section_id": "T2",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p42-c3",
+      "page": 42,
+      "bbox": [
+        373.0,
+        130.3,
+        598.8,
+        281.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page42_figure_3.png",
+      "caption": "Simple switch finite state machine diagram",
+      "description": "This diagram illustrates a basic finite state machine with two discrete states, labeled off and on. An incoming arrow labeled Start points to the initial off state, indicating the default beginning condition of the system. Directed arcs with the label Push connect the two states in a cyclical manner, showing how the system transitions from off to on, and back from on to off when the push event occurs.",
+      "section_id": "T2",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p55-c4",
+      "page": 55,
+      "bbox": [
+        274.9,
+        131.0,
+        692.5,
+        586.5
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page55_figure_3.png",
+      "caption": "State transition diagrams for store, customer, and bank",
+      "description": "This figure illustrates three distinct finite state machines representing the individual behaviors of a store, a customer, and a bank in a transactional system. Diagram (a) shows the store with states labeled 'a' through 'g' transitioning through actions like pay, redeem, transfer, and ship. Diagram (b) depicts the customer as a single state with self-loops for paying and canceling operations. Finally, diagram (c) presents the bank's perspective with numbered states transitioning via cancel, redeem, and transfer actions, demonstrating how different participants model concurrent event-driven protocols.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p57-c5",
+      "page": 57,
+      "bbox": [
+        248.3,
+        131.1,
+        719.4,
+        610.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page57_figure_2.png",
+      "caption": "Finite state automata for store, customer, bank",
+      "description": "This figure illustrates three distinct finite state automata representing system components in a distributed transaction: (a) Store, (b) Customer, and (c) Bank. Each automaton consists of labeled circles representing states and directed edges indicating state transitions triggered by events such as pay, cancel, redeem, transfer, and ship. The diagrams model the valid sequence of protocol interactions and behavioral constraints for each entity participating in the transaction lifecycle.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p58-c6",
+      "page": 58,
+      "bbox": [
+        252.8,
+        653.0,
+        722.8,
+        1051.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page58_figure_4.png",
+      "caption": "State transition diagram of discrete automaton",
+      "description": "This figure illustrates a complex state transition graph featuring multiple connected nodes arranged in a grid-like topology across rows 1 to 4 and columns a to g. Directed edges labeled with variables such as P, S, C, R, and T indicate conditional pathways and loops between individual states. An initial start arrow points to the upper-left node, mapping out how the automaton progresses through iterative cycles and branching decisions.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p63-c7",
+      "page": 63,
+      "bbox": [
+        285.0,
+        723.7,
+        684.4,
+        800.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page63_figure_4.png",
+      "caption": "DFA state transition diagram",
+      "description": "This diagram illustrates a deterministic finite automaton with three states: q0, q2, and q1. The state q0 serves as the start state and transitions to q2 upon reading a 0, while looping on a 1. State q2 acts as an intermediate state that loops on 0 and transitions to the accepting state q1 when reading a 1. Finally, state q1 is designated as an accepting state and features a self-loop that accepts any combination of 0s and 1s.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p64-c8",
+      "page": 64,
+      "bbox": [
+        405.6,
+        222.9,
+        567.6,
+        332.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page64_figure_14.png",
+      "caption": "DFA transition table with three states",
+      "description": "This figure displays a deterministic finite automaton state transition table for an alphabet consisting of the symbols 0 and 1. The table outlines three distinct states, denoted as q0, q1, and q2, where q0 is explicitly marked as the initial state with an incoming arrow, and q1 is designated as an accepting state via an asterisk symbol. Each row specifies the resulting target state when a given input symbol is read from a particular source state, thereby fully defining the transition function of the automaton.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p65-c9",
+      "page": 65,
+      "bbox": [
+        355.4,
+        750.2,
+        608.4,
+        980.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page65_figure_3.png",
+      "caption": "Deterministic finite automaton state diagram",
+      "description": "This diagram illustrates a deterministic finite automaton containing four distinct states labeled q0 through q3, with q0 designated as both the start state and an accepting state via concentric circles. Directed edges between the nodes represent state transitions labeled with binary input symbols '0' and '1'. The layout maps out the complete transition logic, demonstrating how input strings steer the automaton through the interconnected states.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p68-c10",
+      "page": 68,
+      "bbox": [
+        280.1,
+        130.3,
+        692.0,
+        476.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page68_figure_0.png",
+      "caption": "Plaque gate flow network diagram",
+      "description": "This diagram illustrates a network of interconnected channels or pipes with decision points, labeled top inlets A and B, and bottom outlets C and D. Three gate valves labeled x1, x2, and x3 are positioned along specific pathways, each marked with a diagonal slash and a small circular mechanism to control fluid or logical flow. The layout features diamond-shaped obstructions that split or merge the routing channels symmetrically across the vertical centerline. This setup typically models routing logic, hydraulic circuits, or Boolean satisfiability pathways in theoretical computer science and physics.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p71-c11",
+      "page": 71,
+      "bbox": [
+        258.4,
+        590.3,
+        714.1,
+        784.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page71_figure_4.png",
+      "caption": "Computation tree of NFA state transitions",
+      "description": "This diagram illustrates the computation tree of a nondeterministic finite automaton processing an input string sequence of bits: 0, 0, 1, 0, and 1. Each level of the tree represents a transition step from one state to another, starting from the initial state q0 at the root. Branching paths show multiple possible next states for given inputs, with some branches marked as stuck when no valid transitions remain, while successful computation paths progress deeper through states like q1 and q2.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p71-c12",
+      "page": 71,
+      "bbox": [
+        305.1,
+        130.7,
+        666.6,
+        204.9
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page71_figure_7.png",
+      "caption": "Deterministic finite automaton state diagram",
+      "description": "This diagram illustrates a deterministic finite automaton with three states: q0, q1, and q2. The state q0 is designated as the start state and features a self-loop for input symbols 0 and 1, allowing it to remain in this state indefinitely. Upon reading a 0, the machine transitions from q0 to q1, and subsequently from q1 to the accepting state q2 upon reading a 1. The double circle enclosing q2 clearly indicates that it is the sole accepting or final state of this particular automaton.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p78-c13",
+      "page": 78,
+      "bbox": [
+        272.0,
+        129.0,
+        698.8,
+        308.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page78_figure_8.png",
+      "caption": "Subset construction DFA state diagram",
+      "description": "This diagram illustrates the deterministic finite automaton resulting from the subset construction algorithm applied to an NFA. It features three composite states represented as sets of original states: {q0}, {q0, q1}, and the accepting state {q0, q2}. Directed edges labeled with input symbols 0 and 1 connect these states, demonstrating the state transitions and demonstrating how nondeterministic paths are consolidated into a deterministic transition function.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p80-c14",
+      "page": 80,
+      "bbox": [
+        235.6,
+        367.8,
+        734.5,
+        461.5
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page80_figure_4.png",
+      "caption": "DFA accepting strings ending in one",
+      "description": "This diagram illustrates a deterministic finite automaton with a chain of states designed to recognize binary strings where the nth symbol from the end is one. The machine starts at state q0 with a self-loop processing any combination of zeros and ones, then transitions sequentially through intermediate states q1, q2 up to qn upon reading a one. The final state qn is represented by a double circle, indicating it is the accepting state of the language.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p84-c15",
+      "page": 84,
+      "bbox": [
+        205.1,
+        756.3,
+        767.4,
+        937.8
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page84_figure_2.png",
+      "caption": "NFA state transition diagram",
+      "description": "This diagram illustrates a nondeterministic finite automaton with eight numbered circular states and labeled directional transitions. State 1 serves as the designated start state, featuring a self-loop labeled with sigma and branching out to states 2 and 5 via characters 'w' and 'e' respectively. The upper path sequences through states 2 and 3 to reach the accepting state 4, while the lower path sequences through states 5, 6, and 7 to terminate at the accepting state 8, with both accepting states represented by double circles.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p86-c16",
+      "page": 86,
+      "bbox": [
+        200.6,
+        128.5,
+        770.8,
+        640.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page86_figure_3.png",
+      "caption": "Deterministic finite automaton state transition diagram",
+      "description": "This diagram illustrates a deterministic finite automaton with multiple numbered states, including a designated start state and two accepting states represented by double circles. Directed edges connect the states, labeled with specific alphabet symbols or set subtraction notations like Sigma minus e minus w, representing valid state transitions. The network of transitions showcases complex conditional routing and looping behaviors for formal language processing.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p88-c17",
+      "page": 88,
+      "bbox": [
+        222.2,
+        733.1,
+        749.5,
+        915.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page88_figure_2.png",
+      "caption": "NFA state transition diagram",
+      "description": "This figure illustrates a nondeterministic finite automaton state transition diagram with multiple paths and epsilon transitions. State 9 serves as the initial state, featuring a self-loop labeled with alphabet Sigma and branching via epsilon transitions into two distinct sequences. The top path processes the character sequence w, e, and b to reach accepting state 4, while the bottom path processes e, b, a, and y to reach accepting state 8. Double-circled nodes denote the final accepting states of the automaton.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p88-c18",
+      "page": 88,
+      "bbox": [
+        258.0,
+        129.5,
+        714.1,
+        301.9
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page88_figure_4.png",
+      "caption": "NFA recognizing signed numbers",
+      "description": "This diagram illustrates a nondeterministic finite automaton (NFA) designed to recognize signed numbers, including integers and decimals. The automaton starts at state q0 and transitions through various states representing integer parts, decimal points, and fractional digits. State q5 is the final accepting state, denoted by a double circle, which is reached via epsilon transitions from state q3.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p90-c19",
+      "page": 90,
+      "bbox": [
+        307.4,
+        127.9,
+        664.7,
+        292.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page90_figure_6.png",
+      "caption": "NFA state transition diagram",
+      "description": "This directed graph illustrates a nondeterministic finite automaton state transition diagram containing seven numbered states. State 1 serves as the starting point, branching via epsilon transitions into two parallel paths involving intermediate states 2, 3, 4, and 5. Labeled transitions with symbols like 'a', 'b', and epsilon guide the flow toward final destination states 6 and 7. The structural layout explicitly demonstrates how alternative symbol branches and silent epsilon moves are organized in formal automata theory.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p93-c20",
+      "page": 93,
+      "bbox": [
+        257.7,
+        129.6,
+        713.0,
+        424.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page93_figure_4.png",
+      "caption": "Deterministic finite automaton state transition diagram",
+      "description": "This diagram illustrates a deterministic finite automaton with labeled nodes representing grouped states and directed edges indicating valid transitions under specific input symbols like digits and signs. The start state is marked by an incoming arrow pointing to the initial node, while accepting states are represented by double-lined circles. Transitions between states show how the automaton processes numerical strings containing optional signs and decimal points, ensuring correct syntactic structure recognition.",
+      "section_id": "T3",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p108-c21",
+      "page": 108,
+      "bbox": [
+        361.4,
+        127.4,
+        610.3,
+        282.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page108_figure_6.png",
+      "caption": "Equivalence relationships among automata models",
+      "description": "This diagram illustrates the conversion relationships and formal equivalences between four primary models of computation in formal language theory: regular expressions (RE), epsilon-nondeterministic finite automata (ε-NFA), nondeterministic finite automata (NFA), and deterministic finite automata (DFA). Directed arrows connect each model to others, representing standard algorithmic transformations such as subset construction, epsilon-transition elimination, and Kleene's theorem conversions. The layout highlights how any regular expression can be converted into an equivalent epsilon-NFA, which subsequently reduces to standard NFA and DFA structures, proving their expressive equivalence.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p109-c22",
+      "page": 109,
+      "bbox": [
+        343.5,
+        130.8,
+        624.4,
+        314.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page109_figure_4.png",
+      "caption": "Random walk boundary crossing diagram",
+      "description": "This line drawing illustrates a random walk trajectory crossing a horizontal boundary line within a bounded domain. The vertical axis displays labels i, j, and k representing different height levels, while a dotted jagged line traces the random path fluctuating up and down across the constant threshold level k denoted by the wavy line. The trajectory starts near the upper left at level i and terminates near the upper right at level j, visually representing barrier-hitting probabilities or first-passage time problems in stochastic processes.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p110-c23",
+      "page": 110,
+      "bbox": [
+        249.5,
+        450.6,
+        720.2,
+        563.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page110_figure_11.png",
+      "caption": "Path decomposition for regular expression construction",
+      "description": "This diagram illustrates the path decomposition used in algorithms like Kleene's theorem or the Floyd-Warshall algorithm to construct regular expressions or shortest paths through intermediate vertices. It shows a path from source vertex i to destination vertex j passing through several intermediate nodes labeled k. The overall path is broken down into an initial segment from i to the first k belonging to R_{ik}^{(k-1)}, a repeating middle section with zero or more loops in R_{kk}^{(k-1)}, and a final segment belonging to R_{kj}^{(k-1)}.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p110-c24",
+      "page": 110,
+      "bbox": [
+        249.4,
+        449.6,
+        720.4,
+        563.8
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page110_figure_12.png",
+      "caption": "Floyd Warshall path composition diagram",
+      "description": "This diagram illustrates the recursive step in the Floyd-Warshall algorithm or regular expression conversion, showing a path from node i to node j that passes through intermediate nodes k. The path is decomposed into a segment from i to k belonging to R_ik^(k-1), zero or more repeating loops from k to k belonging to R_kk^(k-1), and a final segment from k to j belonging to R_kj^(k-1). Wavy lines represent arbitrary paths or strings of edges connecting the nodes.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p111-c25",
+      "page": 111,
+      "bbox": [
+        348.8,
+        131.6,
+        620.0,
+        206.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page111_figure_6.png",
+      "caption": "Deterministic finite automaton state transition diagram",
+      "description": "This diagram illustrates a deterministic finite automaton with two states, labeled 1 and 2. State 1 is designated as the start state and features a self-loop for the input symbol 1, allowing it to process any sequence of leading ones. Upon reading an input symbol 0, the automaton transitions from state 1 to state 2, which is represented by a double circle indicating it is an accepting state. Once the automaton reaches state 2, it remains there indefinitely via a self-loop that accepts any subsequent combination of 0 and 1 symbols.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p114-c26",
+      "page": 114,
+      "bbox": [
+        320.2,
+        132.7,
+        649.1,
+        590.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page114_figure_1.png",
+      "caption": "State elimination in regular expression conversion",
+      "description": "This diagram illustrates the state elimination step used in converting a finite automaton into a regular expression. It shows a central state $s$ being bypassed, with incoming transitions $Q_1$ through $Q_k$ and outgoing transitions $P_1$ through $P_m$ combining with a self-loop $S$. The new direct transitions, denoted by $R_{ij}$, connect the predecessor states $q_1$ through $q_k$ directly to the successor states $p_1$ through $p_m$. This graphical representation demonstrates how intermediate states can be systematically removed while preserving the language accepted by the automaton.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p115-c27",
+      "page": 115,
+      "bbox": [
+        349.1,
+        131.2,
+        621.7,
+        441.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page115_figure_3.png",
+      "caption": "State transition graph with regular expressions",
+      "description": "This diagram illustrates a directed graph with source states q1 through qk on the left and destination states p1 through pm on the right. Directed edges connect the states, each labeled with a complex algebraic expression involving relational terms like R11, Q1, S*, and P1. These transition labels represent composite operations or relational algebra expressions linking the input and output states in a formal system.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p115-c28",
+      "page": 115,
+      "bbox": [
+        354.2,
+        599.1,
+        617.0,
+        719.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page115_figure_4.png",
+      "caption": "Deterministic finite automaton state transition diagram",
+      "description": "This diagram illustrates a finite state automaton with two states, featuring directed transitions labeled R, S, T, and U between them. The initial start state points to the left circle, which includes a self-loop labeled R. A directed edge labeled S connects the starting state to the accepting double-circle state on the right, which itself possesses a self-loop labeled U. Finally, a transition labeled T returns the process from the accepting state back to the initial state.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p115-c29",
+      "page": 115,
+      "bbox": [
+        424.3,
+        942.7,
+        550.0,
+        1035.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page115_figure_9.png",
+      "caption": "NFA state transition diagram for Kleene star",
+      "description": "This diagram illustrates a finite automaton state transition graph featuring a single state that acts as both the start state and an accepting state, denoted by the concentric circles. An incoming arrow labeled 'Start' points directly to this state, establishing it as the entry point of the machine. Additionally, a self-loop arrow labeled 'R' loops back into the state, indicating that symbol 'R' triggers a transition remaining in the same state.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p116-c30",
+      "page": 116,
+      "bbox": [
+        257.7,
+        487.5,
+        712.9,
+        588.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page116_figure_7.png",
+      "caption": "DFA state transition diagram",
+      "description": "This diagram illustrates a deterministic finite automaton with four distinct states labeled A, B, C, and D. State A serves as the designated start state, while states C and D are marked with double circles to represent accepting or final states. Directed arrows connecting the nodes depict state transitions triggered by reading specific input symbols, such as 0 and 1, demonstrating how strings are processed through the sequential logic machine.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p116-c31",
+      "page": 116,
+      "bbox": [
+        257.5,
+        129.4,
+        713.1,
+        221.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page116_figure_8.png",
+      "caption": "DFA state transition diagram",
+      "description": "This diagram illustrates a deterministic finite automaton with four distinct states labeled A, B, C, and D. State A serves as the designated start state, while states C and D are marked as double-circled accepting states. Directed edges and self-loops indicate how input symbols trigger transitions between the various states.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p117-c32",
+      "page": 117,
+      "bbox": [
+        258.4,
+        129.9,
+        712.8,
+        230.9
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page117_figure_5.png",
+      "caption": "NFA state transition diagram",
+      "description": "This diagram illustrates a finite automaton featuring states A, C, and D, with state A designated as the start state and states C and D marked as accepting states with double circles. Directed edges indicate state transitions labeled with regular expressions such as 0 + 1 and 1(0 + 1). Specifically, state A loops on 0 + 1 and transitions to C on 1(0 + 1), while state C transitions to D on 0 + 1, demonstrating pattern recognition and sequential state processing.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p117-c33",
+      "page": 117,
+      "bbox": [
+        329.5,
+        294.0,
+        642.3,
+        392.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page117_figure_7.png",
+      "caption": "NFA state transition diagram",
+      "description": "This diagram illustrates a nondeterministic finite automaton with two states, labeled A and D. State A serves as the start state and features a self-loop labeled with the regular expression 0 + 1, allowing any combination of zeros and ones to be processed while remaining in this state. A directed edge with the transition label 1(0 + 1)(0 + 1) connects state A to the accepting state D, represented by a double circle. This specific transition structure demonstrates how the automaton recognizes strings that end with a specific pattern of three symbols starting with a 1.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p118-c34",
+      "page": 118,
+      "bbox": [
+        342.7,
+        552.8,
+        627.6,
+        653.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page118_figure_10.png",
+      "caption": "NFA state transition diagram",
+      "description": "This diagram illustrates a nondeterministic finite automaton with states labeled A and C. State A serves as the initial starting state, featuring a self-loop labeled with the regular expression 0 + 1 that allows it to consume inputs 0 or 1 while remaining in the same state. A directed transition labeled 1(0 + 1) connects state A to the accepting state C, which is represented by a double circle. The automaton transitions to the final state upon reading specific input sequences defined by the edge labels.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p119-c35",
+      "page": 119,
+      "bbox": [
+        380.8,
+        129.0,
+        593.4,
+        449.8
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page119_figure_1.png",
+      "caption": "NFA subset construction state transitions",
+      "description": "This figure illustrates fundamental building blocks used in Thompson's construction algorithm for converting regular expressions into nondeterministic finite automata. Subfigure (a) depicts an epsilon transition from a start state to an accept state. Subfigure (b) shows a basic state machine without transitions, while subfigure (c) demonstrates a transition labeled with a specific alphabet symbol 'a' leading from the initial state to the final accepting state.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p120-c36",
+      "page": 120,
+      "bbox": [
+        284.4,
+        129.5,
+        687.9,
+        682.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page120_figure_0.png",
+      "caption": "Thompson's construction for regular expressions",
+      "description": "This figure illustrates the inductive step of Thompson's construction algorithm, which translates regular expressions into equivalent nondeterministic finite automata. Diagram (a) depicts the union operation (R U S), using epsilon transitions to branch from a single start state into sub-automata R and S before rejoining. Diagram (b) shows the concatenation operation (R followed by S), linking the exit state of R to the entry state of S via an epsilon transition. Finally, diagram (c) presents the Kleene star operation (R*), incorporating feedback and bypass epsilon transitions to allow for zero or more repetitions of the sub-automaton R.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p121-c37",
+      "page": 121,
+      "bbox": [
+        268.3,
+        130.6,
+        701.1,
+        802.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page121_figure_2.png",
+      "caption": "NFA construction for regular expressions",
+      "description": "This figure illustrates the step-by-step construction of a nondeterministic finite automaton from regular expressions using Thompson's construction rules. Part (a) shows the basic building block for alternation between symbols 0 and 1 using epsilon transitions. Part (b) extends this structure by adding outer epsilon transitions to represent the Kleene star operation. Part (c) demonstrates concatenation of automata, linking the start and final states to form a complete NFA recognizing a complex regular expression.",
+      "section_id": "T4",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p144-c38",
+      "page": 144,
+      "bbox": [
+        264.3,
+        665.7,
+        706.8,
+        789.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page144_figure_6.png",
+      "caption": "Pumping lemma for regular languages visualization",
+      "description": "This diagram illustrates the pumping lemma for regular languages, demonstrating how a string is parsed by a finite automaton. It breaks a sufficiently long string $w = xyz$ into three parts, where the middle segment $y$ corresponds to a cycle in the state transition path from state $p_0$ back to state $p_i$. The figure emphasizes that repeating or pumping the loop segment $y$ zero or more times still results in a valid string recognized by the automaton.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p151-c39",
+      "page": 151,
+      "bbox": [
+        276.6,
+        129.0,
+        695.6,
+        307.9
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page151_figure_6.png",
+      "caption": "DFA state transition diagram",
+      "description": "This diagram illustrates a deterministic finite automaton state transition graph derived from subset construction. It features three nodes representing combined states: {q0} as the starting double-circled accept state, {q0, q1} as another double-circled accept state, and {q0, q2} as a single-circled normal state. Directed edges with labels 0 and 1 connect these states, showing how inputs trigger transitions between subsets of original NFA states.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p152-c40",
+      "page": 152,
+      "bbox": [
+        255.4,
+        491.9,
+        708.7,
+        808.8
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page152_figure_4.png",
+      "caption": "Intersection of two automata machines diagram",
+      "description": "This diagram illustrates the intersection construction for regular languages, combining two automata, $A_L$ and $A_M$, to process a shared input $a$. The start state splits to feed both machines simultaneously. The outputs from both machines are then routed into an AND logic gate, meaning the overall system accepts the input only if both component automata accept it.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p153-c41",
+      "page": 153,
+      "bbox": [
+        351.0,
+        324.0,
+        614.6,
+        814.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page153_figure_3.png",
+      "caption": "NFA union construction state diagrams",
+      "description": "This figure illustrates the standard construction used to prove that regular languages are closed under union, showing component automata and their combined product. Parts (a) and (b) display two individual nondeterministic finite automata recognizing separate languages, with start states $p$ and $r$ and accepting states $q$ and $s$. Part (c) presents the resulting combined NFA constructed using subset-like pairings of states ($pr$, $ps$, $qr$, $qs$), illustrating how transitions are formed from the original machines to accept the union of both languages.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p157-c42",
+      "page": 157,
+      "bbox": [
+        344.4,
+        562.8,
+        627.2,
+        1027.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page157_figure_2.png",
+      "caption": "Homomorphism and inverse homomorphism mapping visualization",
+      "description": "The figure illustrates the operations of homomorphism and inverse homomorphism between two sets using Venn-like set diagrams. Part (a) shows a homomorphism $h$ mapping a language $L$ from a domain set to its image set $h(L)$ in the codomain. Part (b) demonstrates the inverse homomorphism, where a language $L$ in the codomain is mapped back via $h$ to its preimage $h^{-1}(L)$ in the domain set. These diagrams visually clarify how string transformations alter language boundaries in automata theory.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p159-c43",
+      "page": 159,
+      "bbox": [
+        269.0,
+        131.1,
+        693.8,
+        402.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page159_figure_2.png",
+      "caption": "Reduction mechanism mapping input via function",
+      "description": "This diagram illustrates the concept of a reduction between computational problems in automata theory and complexity. An outer box represents a new machine constructed to decide a language, taking an input 'a'. This input passes through a preprocessing function 'h', transforming 'a' into 'h(a)' before it enters the underlying decider machine 'A'. Meanwhile, the start state and final accept or reject outcomes are preserved through the wrapper to maintain decision equivalence.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p161-c44",
+      "page": 161,
+      "bbox": [
+        263.4,
+        130.9,
+        678.8,
+        608.5
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page161_figure_2.png",
+      "caption": "Regular language transformation pipeline steps",
+      "description": "This flowchart illustrates the step-by-step transformation process used to prove closure properties of regular languages under specific operations. It begins with the language of an automaton M and applies a sequence of formal language operations, including inverse homomorphisms, intersections, and differences with regular languages. Each successive stage (L1 through L4) refines the string representations by enforcing structural conditions such as start states, adjacent state equality, and valid path constraints before concluding with a final homomorphism.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p171-c45",
+      "page": 171,
+      "bbox": [
+        270.6,
+        544.3,
+        703.9,
+        814.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page171_figure_4.png",
+      "caption": "Deterministic finite automaton state diagram",
+      "description": "This diagram illustrates a deterministic finite automaton containing eight distinct states, labeled A through H, represented by circular nodes. State A serves as the designated start state, indicated by the incoming arrow, while state C is marked with a double circle as the accepting state. Directed edges connect the nodes, labeled with binary input values of zero or one, demonstrating how the automaton transitions between states based on sequential input symbols.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p172-c46",
+      "page": 172,
+      "bbox": [
+        363.5,
+        743.2,
+        605.8,
+        985.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page172_figure_6.png",
+      "caption": "DFA state minimization table",
+      "description": "This triangular state equivalence table illustrates the process of minimizing states in a deterministic finite automaton with states labeled A through H. Each cell in the grid represents a pair of states, with an 'x' marking pairs that have been determined to be distinguishable based on final state status or transition outcomes. Empty cells indicate state pairs that remain equivalent and are candidates for merging. The rows and columns are aligned to systematically compare every unique pair of states in the automaton.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p174-c47",
+      "page": 174,
+      "bbox": [
+        373.2,
+        432.9,
+        599.4,
+        784.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page174_figure_3.png",
+      "caption": "Deterministic finite automata state transition diagrams",
+      "description": "This figure displays two distinct state transition diagrams for deterministic finite automata. The top diagram features states A and B, where state A is designated as both the start and accepting state, with transitions governed by binary inputs 0 and 1. The bottom diagram illustrates a more complex automaton consisting of states C, D, and E, featuring multiple directed edges labeled with 0 and 1 that define the language recognition behavior across the network of states.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p174-c48",
+      "page": 174,
+      "bbox": [
+        406.4,
+        1015.9,
+        561.9,
+        1169.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page174_figure_4.png",
+      "caption": "State minimization table with distinguishability marks",
+      "description": "This triangular table is used in automata theory to determine distinguishable state pairs during DFA state minimization. The rows and columns are labeled with state letters A through E, forming cells for each unique state pair. Certain cells contain an 'x' mark, indicating that the corresponding pair of states is distinguishable. Unmarked cells represent pairs that are currently considered equivalent and require further testing of their transition behaviors.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p178-c49",
+      "page": 178,
+      "bbox": [
+        311.8,
+        132.8,
+        659.8,
+        481.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page178_figure_3.png",
+      "caption": "Minimized deterministic finite automaton state diagram",
+      "description": "This diagram illustrates a minimized deterministic finite automaton with grouped states represented by circular nodes containing state combinations such as A,E and D,F. Directed edges between the nodes represent state transitions labeled with binary inputs 0 and 1, mapping how the system moves from one condition to another. Node C, denoted by a double concentric circle, serves as the final or accepting state, while node A,E is designated as the initial starting state with an incoming arrow labeled Start.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p179-c50",
+      "page": 179,
+      "bbox": [
+        366.1,
+        608.4,
+        606.4,
+        808.5
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page179_figure_10.png",
+      "caption": "Deterministic finite automaton state transition diagram",
+      "description": "This directed graph represents a deterministic finite automaton with three states labeled A, B, and C. State A serves as the initial start state, indicated by the incoming arrow without a source, while state B is designated as the sole accepting state with a double concentric circle. Directed edges labeled with input symbols '0' and '1' define the state transitions between them, illustrating how the machine processes binary strings.",
+      "section_id": "T5",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p200-c51",
+      "page": 200,
+      "bbox": [
+        416.0,
+        330.2,
+        553.8,
+        520.9
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page200_figure_6.png",
+      "caption": "Context-free grammar parse tree",
+      "description": "This diagram displays a hierarchical parse tree illustrating a specific syntactic derivation using non-terminal variable P and terminal symbols. The root node expands into terminal zeros and another instance of variable P, which subsequently branches into terminal ones and a further P node. At the lowest level of recursion, the innermost variable P transitions directly to the empty string symbol epsilon, successfully completing the structural derivation.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p200-c52",
+      "page": 200,
+      "bbox": [
+        416.0,
+        131.7,
+        552.5,
+        265.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page200_figure_7.png",
+      "caption": "Ambiguous parse tree for arithmetic expression",
+      "description": "This diagram illustrates a parse tree structure in a context-free grammar for arithmetic expressions, specifically highlighting operator precedence or syntactic ambiguity. The root node $E$ branches into three children representing an expression involving an addition operator: a left sub-expression $E$, a central addition symbol $+$, and a right sub-expression $E$. Additionally, the leftmost child $E$ further extends down to an identifier node $I$, demonstrating hierarchical grammatical derivation. Such trees are fundamental in compiler design for analyzing the syntactic structure of programming language constructs.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p201-c53",
+      "page": 201,
+      "bbox": [
+        372.8,
+        131.1,
+        597.4,
+        554.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page201_figure_3.png",
+      "caption": "Parse tree for algebraic expression",
+      "description": "This parse tree illustrates the hierarchical syntactic structure of the arithmetic expression a * (a + b00), generated according to specific grammar rules. Non-terminal nodes denoted by E and I represent expressions and identifiers, respectively, while terminal symbols include operators like multiplication and addition, parentheses, and variable names. The top-level root node decomposes into a product operation, grouping the left-hand identifier 'a' with a parenthesized subexpression on the right. This subexpression further resolves into an addition operation between another identifier 'a' and a multi-digit identifier structure.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p202-c54",
+      "page": 202,
+      "bbox": [
+        281.2,
+        131.9,
+        683.7,
+        310.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page202_figure_4.png",
+      "caption": "Equivalence of parsing methods and derivations",
+      "description": "This diagram illustrates the equivalence and interrelationships among five core parsing and derivation concepts in formal language theory. It connects parse trees, leftmost derivations, rightmost derivations, general derivations, and recursive inference through a directed cycle of arrows. The layout demonstrates how each concept can be systematically converted into or derived from another, highlighting the underlying structural equivalence of these different representations in grammar analysis.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p202-c55",
+      "page": 202,
+      "bbox": [
+        393.5,
+        811.0,
+        576.6,
+        909.5
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page202_figure_7.png",
+      "caption": "Pumping lemma string decomposition",
+      "description": "This diagram illustrates the structural decomposition of a string w used in the proof of the pumping lemma for context-free languages. The apex label A represents a nonterminal variable that generates the string w, depicted along the base with length bounded by the lemma's constant. The geometric shape represents a parse tree or derivation path where substrings can be repeated or pumped to demonstrate language membership properties.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p203-c56",
+      "page": 203,
+      "bbox": [
+        342.8,
+        329.2,
+        630.7,
+        486.8
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page203_figure_8.png",
+      "caption": "Parse tree derivation step",
+      "description": "This figure illustrates a parse tree derivation step in a context-free grammar, showing a non-terminal symbol A expanding into a sequence of symbols X1 through Xk. Each symbol Xi at the root of a triangular subtree derives a corresponding substring w1 through wk. The diagram visually represents the hierarchical structure and recursive substitution process inherent in grammatical derivations.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p214-c57",
+      "page": 214,
+      "bbox": [
+        292.7,
+        555.1,
+        676.9,
+        897.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page214_figure_7.png",
+      "caption": "Context-free grammar rules for markup language",
+      "description": "This figure presents a set of six context-free grammar production rules defining the syntax of a simple markup language. The rules illustrate how non-terminal symbols like Char, Text, Doc, Element, ListItem, and List can be expanded into terminal characters, empty strings epsilon, or nested markup tags such as EM, P, OL, and LI. Through these formal definitions, the grammar establishes recursive structures necessary for parsing hierarchical documents.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p217-c58",
+      "page": 217,
+      "bbox": [
+        194.0,
+        128.1,
+        774.2,
+        511.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page217_figure_7.png",
+      "caption": "XML Document Type Definition for PC Specifications",
+      "description": "This figure displays an XML Document Type Definition (DTD) named PcSpecs, which defines the structural constraints and element hierarchies for personal computer specifications. The DTD declares a root element PCS containing zero or more PC elements, each structured with mandatory children including MODEL, PRICE, PROCESSOR, RAM, and one or more DISK elements. Furthermore, it defines complex nested elements such as PROCESSOR and DISK, where DISK utilizes a choice operator between HARDDISK, CD, and DVD storage types.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p218-c59",
+      "page": 218,
+      "bbox": [
+        194.2,
+        126.4,
+        555.3,
+        679.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page218_figure_3.png",
+      "caption": "XML document representing personal computer specifications",
+      "description": "This figure illustrates a hierarchical XML document structure designed to represent a collection of personal computers, indicated by the root element <PCS>. Within the opening <PC> element, various nested tags detail specific hardware attributes such as MODEL, PRICE, PROCESSOR, RAM, and multiple DISK entries including both HARDDISK and CD components. Each tag uses matching opening and closing delimiters to encapsulate text values and sub-elements, demonstrating how semi-structured data is organized into parent-child relationships for storage and exchange.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p223-c60",
+      "page": 223,
+      "bbox": [
+        245.9,
+        129.5,
+        724.6,
+        312.8
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page223_figure_9.png",
+      "caption": "Ambiguous parse trees for arithmetic expression",
+      "description": "This figure illustrates two distinct parse trees, labeled (a) and (b), representing an ambiguous syntactic structure for an arithmetic expression containing addition and multiplication operators. Tree (a) groups the multiplication operation lower in the right branch under the addition, whereas tree (b) groups the addition operation lower in the left branch under the multiplication. This structural ambiguity demonstrates how the same sequence of tokens can be parsed in multiple ways, violating standard operator precedence rules unless explicitly resolved by grammar design.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p224-c61",
+      "page": 224,
+      "bbox": [
+        242.2,
+        128.9,
+        727.2,
+        425.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page224_figure_2.png",
+      "caption": "Ambiguous parse trees for arithmetic expression",
+      "description": "This figure illustrates two distinct parse trees, labeled (a) and (b), derived from the same ambiguous grammar for the arithmetic expression evaluating 'a + a * a'. Tree (a) groups the multiplication operation below the addition, yielding the standard precedence interpretation of 'a + (a * a)'. Conversely, tree (b) groups the addition operation below the multiplication, demonstrating operator precedence ambiguity as it implies the alternative grouping '(a + a) * a'. These structural differences highlight how context-free grammars can yield multiple valid derivations for identical strings of terminals.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p226-c62",
+      "page": 226,
+      "bbox": [
+        384.6,
+        771.1,
+        584.9,
+        1081.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page226_figure_3.png",
+      "caption": "Parse tree for arithmetic expression",
+      "description": "This parse tree illustrates the hierarchical syntactic structure of an arithmetic expression generated by a context-free grammar. The root node represents the top-level expression $E$, which branches into subexpressions combined by addition operators, while term nodes $T$, factor nodes $F$, and identifier nodes $I$ break down further into terminal symbols such as variables and multiplication operators. This structural representation demonstrates how operator precedence and associativity are resolved during syntactic analysis in compiler design.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p227-c63",
+      "page": 227,
+      "bbox": [
+        327.1,
+        445.5,
+        639.2,
+        753.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page227_figure_3.png",
+      "caption": "Ambiguous parse tree for term multiplication",
+      "description": "This figure illustrates a degenerate parse tree showing the structural ambiguity inherent in left-recursive grammar rules for multiplication expressions. The hierarchical tree structure expands downward with repeated applications of non-terminal symbols T and F connected by multiplication operators represented as asterisks. The elongated chain connected by ellipsis dots demonstrates how ambiguous syntax can generate deeply nested derivations for linear sequences of terms.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p230-c64",
+      "page": 230,
+      "bbox": [
+        231.9,
+        129.9,
+        742.0,
+        484.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page230_figure_2.png",
+      "caption": "Context-free grammar parse trees",
+      "description": "This figure illustrates two distinct parse trees derived from a context-free grammar. Diagram (a) shows a balanced structure where non-terminal symbols expand symmetrically into left and right subtrees. Diagram (b) demonstrates an unbalanced, linear-like derivation sequence with nested non-terminal nodes. Together, these trees highlight the hierarchical syntactic relationships and structural ambiguities that can be represented within formal language theory.",
+      "section_id": "T6",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p241-c65",
+      "page": 241,
+      "bbox": [
+        304.3,
+        392.9,
+        657.5,
+        568.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page241_figure_4.png",
+      "caption": "Pushdown automaton architecture diagram",
+      "description": "This schematic diagram illustrates the fundamental architecture of a pushdown automaton, a theoretical model of computation that extends finite automata with a stack memory. The central component is a finite state control unit, which receives a sequential string input from the left and produces an accept or reject decision on the right. A bidirectional arrow connects the finite state control unit to an external stack structure, representing the automaton's ability to push and pop symbols during computation.",
+      "section_id": "T7",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p245-c66",
+      "page": 245,
+      "bbox": [
+        291.0,
+        130.2,
+        679.4,
+        383.9
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page245_figure_2.png",
+      "caption": "Pushdown automaton state transition diagram",
+      "description": "This diagram illustrates a pushdown automaton featuring three distinct states labeled q0, q1, and q2, where q0 serves as the initial state and q2 is designated as an accepting state. Directed edges between states and self-loops are annotated with stack operations specifying the input symbol, stack top, and replacement string. The transitions define the formal mechanics of stack-based string processing, showing how symbols push onto and pop off the stack during computation.",
+      "section_id": "T7",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p246-c67",
+      "page": 246,
+      "bbox": [
+        240.2,
+        621.3,
+        722.9,
+        1169.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page246_figure_1.png",
+      "caption": "Pushdown automaton instantaneous descriptions tree",
+      "description": "This figure illustrates a tree of instantaneous descriptions (IDs) for a pushdown automaton processing an input string. Each node represents a configuration consisting of the current state, the remaining unread input string, and the contents of the stack. Directed edges denote valid transitions between configurations according to the transition function, showing multiple computation branches including non-deterministic paths and eventual acceptance states.",
+      "section_id": "T7",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p252-c68",
+      "page": 252,
+      "bbox": [
+        246.3,
+        514.9,
+        724.9,
+        793.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page252_figure_5.png",
+      "caption": "PDA state transition diagram with start state",
+      "description": "This diagram illustrates the state transition structure of a pushdown automaton, highlighting the initialization phase from a start state p0 to a central subset of states labeled PN. Transitions are labeled with input symbols, stack symbols popped, and symbols pushed onto the stack, such as epsilon, X0 over Z0X0. Additionally, specific transitions connect internal states to a designated final accepting state pf using epsilon-moves and stack operations.",
+      "section_id": "T7",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p254-c69",
+      "page": 254,
+      "bbox": [
+        246.0,
+        474.9,
+        724.8,
+        603.9
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page254_figure_1.png",
+      "caption": "Pushdown automaton state transition diagram",
+      "description": "This diagram illustrates the state transitions of a pushdown automaton with three states labeled p, q, and r. State p serves as the start state, transitioning to state q upon reading an epsilon input while manipulating the stack symbol X0. State q features a self-loop handling inputs e and i with corresponding stack operations Z to epsilon and Z to ZZ. Finally, the automaton transitions from state q to the accepting state r via an epsilon transition, popping the stack symbol.",
+      "section_id": "T7",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p254-c70",
+      "page": 254,
+      "bbox": [
+        409.1,
+        131.2,
+        558.8,
+        251.8
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page254_figure_6.png",
+      "caption": "Pushdown automaton state transition diagram",
+      "description": "This diagram illustrates a single state pushdown automaton with a self-loop transition. State q is marked as the start state via an incoming arrow labeled 'Start'. The self-loop features two transition rules governing stack operations: input 'e' with stack symbol 'Z' replaced by empty string epsilon, and input 'i' with stack symbol 'Z' replaced by two stack symbols 'ZZ'.",
+      "section_id": "T7",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p255-c71",
+      "page": 255,
+      "bbox": [
+        217.8,
+        479.6,
+        752.1,
+        604.9
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page255_figure_2.png",
+      "caption": "PDA empty stack acceptance conversion diagram",
+      "description": "This diagram illustrates the construction used to convert a pushdown automaton accepting by final state into one accepting by empty stack. The initial state $p_0$ transitions to a new start state $q_0$ of the original automaton $P_F$, pushing a special bottom-of-stack marker $Z_0$. From the final accepting states within $P_F$, transitions lead to a garbage-collection state $p$ via epsilon inputs and any stack symbols, popping everything until the stack is empty.",
+      "section_id": "T7",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p258-c72",
+      "page": 258,
+      "bbox": [
+        257.6,
+        489.3,
+        713.7,
+        573.8
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page258_figure_9.png",
+      "caption": "Equivalence of grammars and pushdown automata",
+      "description": "This diagram illustrates the equivalence and bidirectional conversion relationships between context-free grammars and pushdown automata. Three distinct nodes represent different formalisms: Grammar, Pushdown Automaton accepting by empty stack, and Pushdown Automaton accepting by final state. Directed curved arrows between adjacent nodes indicate that transformations exist in both directions, demonstrating that these three formal computational models are capable of recognizing the exact same class of languages.",
+      "section_id": "T7",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p261-c73",
+      "page": 261,
+      "bbox": [
+        345.2,
+        406.0,
+        624.2,
+        750.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page261_figure_5.png",
+      "caption": "Non-differentiable function graph with critical points",
+      "description": "This diagram illustrates a continuous function plotted on a 2D Cartesian coordinate system, featuring several local extrema, sharp corners, and discontinuities in slope. Horizontal dotted lines indicate specific threshold values, while vertical dotted lines mark key input coordinates such as x1, x2, and x3 along the horizontal axis. Region labels like B, a, and C segment the vertical range, highlighting how the curve crosses different intervals and boundary conditions. The plot serves as a mathematical example for analyzing continuity, differentiability, and critical behavior of complex functions.",
+      "section_id": "T7",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p262-c74",
+      "page": 262,
+      "bbox": [
+        339.2,
+        363.8,
+        630.2,
+        709.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page262_figure_3.png",
+      "caption": "Piecewise function curve with peaks and intervals",
+      "description": "This diagram illustrates a complex mathematical function curve plotted across partitioned intervals along the horizontal axis, labeled from x1 to xk. The curve features a series of local peaks denoted as p0, p1, up to pk-1, representing distinct turning points or extrema within each sub-interval. Along the vertical axis, corresponding height markers Y1, Y2, and Yk denote function values or bounds associated with the partitioned segments, visually demonstrating how the curve behaves across varying domains in optimization or numerical analysis problems.",
+      "section_id": "T7",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p268-c75",
+      "page": 268,
+      "bbox": [
+        290.8,
+        651.4,
+        679.6,
+        907.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page268_figure_5.png",
+      "caption": "Pushdown automaton state transition diagram",
+      "description": "This diagram illustrates a pushdown automaton (PDA) containing three states: an initial state $q_0$, an intermediate state $q_1$, and an accepting state $q_2$. State $q_0$ features self-loops with transition labels governing stack operations for binary inputs before encountering a separator $c$. The transition from $q_0$ to $q_1$ processes the character $c$ while preserving stack symbols. Inside state $q_1$, self-loops handle subsequent matching operations before an empty string transition leads to the final accepting state $q_2$.",
+      "section_id": "T7",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p288-c76",
+      "page": 288,
+      "bbox": [
+        231.5,
+        862.9,
+        740.2,
+        1155.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page288_figure_10.png",
+      "caption": "Context-free grammar production rules",
+      "description": "This figure presents a formal context-free grammar consisting of eleven production rules for parsing expressions. Non-terminal symbols such as E, T, F, and I appear on the left side of each arrow, while alternative expansions utilizing both terminal and non-terminal symbols are listed on the right side. The grammar incorporates operator symbols like addition and multiplication, parentheses for grouping, and identifier components, defining the hierarchical syntactic structure of the language.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p289-c77",
+      "page": 289,
+      "bbox": [
+        244.0,
+        452.1,
+        724.2,
+        815.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page289_figure_5.png",
+      "caption": "Context-free grammar production rules",
+      "description": "This figure presents a formal set of production rules for a context-free grammar, defining structural replacements for various non-terminal symbols. The rules establish syntactic hierarchies using left-hand side variables mapped to alternative right-hand side sequences separated by vertical bars. Key non-terminals such as E, T, and F govern expression parsing, while auxiliary rules handle operators, constants, and grouping symbols.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p291-c78",
+      "page": 291,
+      "bbox": [
+        243.4,
+        325.6,
+        726.5,
+        966.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page291_figure_1.png",
+      "caption": "Parse tree grammar transformations",
+      "description": "The figure illustrates two alternative parse tree structures labeled (a) and (b), which typically represent grammatical transformations or syntactic structures in formal language theory. Diagram (a) shows a right-branching or recursive binary tree structure with nested nodes C1 through Ck-2 and subtrees B1 through Bk. In contrast, diagram (b) presents a flattened, n-ary branching tree where the root node A directly dominates all subtrees B1 through Bk simultaneously. These structures demonstrate how nested syntactic constructs can be reconfigured or analyzed in compiler design and parsing algorithms.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p291-c79",
+      "page": 291,
+      "bbox": [
+        242.8,
+        326.6,
+        727.7,
+        967.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page291_figure_3.png",
+      "caption": "Parse tree structures for ambiguous grammar",
+      "description": "The figure illustrates two different parse tree structures, labeled (a) and (b), derived from a context-free grammar. Part (a) shows a right-branching or left-branching binary parse tree where intermediate non-terminals C1 through Ck-2 group the branches sequentially. Part (b) shows a flattened, n-ary parse tree where the root node A directly dominates all child nodes B1 through Bk in a single flat structure. This contrast demonstrates how structural ambiguity can yield multiple distinct derivation trees for the same string.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p296-c80",
+      "page": 296,
+      "bbox": [
+        306.1,
+        761.5,
+        663.0,
+        1031.8
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page296_figure_2.png",
+      "caption": "Pumping lemma parse tree structure",
+      "description": "This diagram illustrates the parse tree structure used in proofs of the pumping lemma for context-free languages. The large triangular region represents a parse tree rooted at A0 that generates a long string containing variable $A_k$. Internal nodes along a single path are labeled $A_0, A_1, A_2, \\dots, A_k$, demonstrating the repetition of variables when the tree height exceeds the grammar's branching factor. This repetition allows substrings to be pumped.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p297-c81",
+      "page": 297,
+      "bbox": [
+        307.0,
+        211.2,
+        664.3,
+        530.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page297_figure_4.png",
+      "caption": "Pumping lemma parse tree illustration",
+      "description": "This diagram illustrates the parse tree structure used in the proof of the pumping lemma for context-free languages. It depicts a large derivation tree rooted at symbol S, containing nested subtrees for nonterminals A_i and A_j where A_i equals A_j. The yield of the tree is partitioned into five distinct substrings u, v, w, x, and y, which together form the string z, demonstrating how repeating nonterminals allow sections v and x to be pumped.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p298-c82",
+      "page": 298,
+      "bbox": [
+        322.8,
+        130.0,
+        642.7,
+        692.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page298_figure_1.png",
+      "caption": "Pumping lemma for context-free languages",
+      "description": "This figure illustrates the parse tree transformations used in the proof of the pumping lemma for context-free languages. Part (a) shows a parse tree for a sufficiently long string divided into five segments, uvwxy, where repeated nonterminals generate nested structures. Part (b) demonstrates the effect of pumping down by omitting the repeated section, yielding the shorter string uwy. Part (c) illustrates pumping up by duplicating the repeated section, resulting in the expanded string uv^2wx^2y.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p304-c83",
+      "page": 304,
+      "bbox": [
+        276.1,
+        129.3,
+        695.2,
+        359.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page304_figure_3.png",
+      "caption": "Parse tree for context-free grammar",
+      "description": "This diagram illustrates the hierarchical structure of a parse tree derived from a context-free grammar or grammatical derivation. The top node S represents the start symbol, branching downward into intermediate non-terminal symbols labeled S_a1 through S_an. Each of these intermediate nodes further expands into terminal symbols or subtrees labeled x1, x2 through xn at the leaves. The branching structure demonstrates how higher-level syntactic categories decompose into specific sequential components in formal language theory.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p307-c84",
+      "page": 307,
+      "bbox": [
+        253.5,
+        129.6,
+        711.7,
+        468.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page307_figure_2.png",
+      "caption": "FA and PDA intersection architecture diagram",
+      "description": "This diagram illustrates the parallel composition of a finite automaton and a pushdown automaton used for language intersection proofs. The shared input string feeds simultaneously into both the finite automaton state component and the pushdown automaton state component, which interacts directly with an external stack. The boolean outputs from both automata components are combined using an AND gate to yield a final accept or reject decision for the overall system.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p311-c85",
+      "page": 311,
+      "bbox": [
+        282.6,
+        129.7,
+        683.4,
+        455.5
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page311_figure_1.png",
+      "caption": "Pushdown automaton with input buffer and stack",
+      "description": "This diagram illustrates the architectural model of a pushdown automaton enhanced with an input buffer. An input symbol enters the system and undergoes transformation via function h, producing a buffered symbol that is then processed by the PDA state controller. The controller interacts bidirectionally with an external stack memory while evaluating the input sequence to yield a final accept or reject decision.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p317-c86",
+      "page": 317,
+      "bbox": [
+        250.1,
+        645.1,
+        723.6,
+        862.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page317_figure_5.png",
+      "caption": "Grammar rule generation data structures",
+      "description": "This figure illustrates the data structures and relationships used in grammar rule generation algorithms. On the left, a lookup table tracks the 'Generating?' status of non-terminal symbols A and B, indicating whether they can produce terminal strings. In the center, linked symbol sequences for rules associated with symbols A and C are shown, containing elements like B, c, D, and A. Dashed and dotted arrows connect these symbol arrays to count boxes on the right, which store the occurrence counts (such as 3 and 2) used to track rule completeness and frequency.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p319-c87",
+      "page": 319,
+      "bbox": [
+        364.0,
+        705.5,
+        604.5,
+        981.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page319_figure_6.png",
+      "caption": "Dynamic programming state triangular matrix layout",
+      "description": "This figure illustrates a triangular array of state variables indexed from X_11 to X_55, commonly used in dynamic programming algorithms such as optimal polygon triangulation or parsing. The horizontal axis lists elements a_1 through a_5, which define the boundaries or indices of the subproblems being evaluated. Each cell X_ij represents the optimal substructure solution for the subproblem spanning from index i to j, arranged in a bottom-up triangular format to visualize dependency hierarchies.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p320-c88",
+      "page": 320,
+      "bbox": [
+        390.9,
+        844.5,
+        580.6,
+        1032.5
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page320_figure_6.png",
+      "caption": "Fermat's principle light path caustic",
+      "description": "This diagram illustrates Fermat's principle of least time through a collection of intersecting ray paths between a source point and a destination point. Solid lines represent the direct extremal ray paths with arrows indicating direction, while dashed lines depict neighboring paths that form a caustic envelope. The geometric configuration demonstrates how infinitesimal variations in optical path length lead to stationary points, forming the characteristic cusped caustic curve often seen in wave optics and geometrical optics.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p321-c89",
+      "page": 321,
+      "bbox": [
+        321.4,
+        597.1,
+        647.2,
+        866.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page321_figure_6.png",
+      "caption": "CYK parsing triangular table structure",
+      "description": "This figure illustrates a triangular parsing table used in the Cocke-Younger-Kasami (CYK) algorithm for context-free grammars. The input string b-a-a-b-a is listed along the bottom axis, and each cell in the triangular grid contains the set of non-terminal variables that can generate the corresponding substring. The upper cells combine results from smaller sub-segments, culminating in the topmost cell which contains the start symbol if the entire string is valid.",
+      "section_id": "T8",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p334-c90",
+      "page": 334,
+      "bbox": [
+        341.9,
+        129.1,
+        628.4,
+        253.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page334_figure_6.png",
+      "caption": "Hello-world tester decision problem diagram",
+      "description": "This diagram illustrates the conceptual block of a Hello-world tester, denoted as program H, which takes two inputs: a program P and an input string I. The system analyzes whether the given program P prints the phrase hello-world when executed with input I. Based on this analysis, the tester produces a binary output branching to either yes or no, demonstrating the fundamental setup used in computability theory proofs regarding program behavior analysis.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p335-c91",
+      "page": 335,
+      "bbox": [
+        290.1,
+        128.0,
+        678.4,
+        254.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page335_figure_4.png",
+      "caption": "Program verifier input output mapping",
+      "description": "This diagram illustrates the conceptual behavior of a program verification function denoted as H1. Two inputs labeled I and P feed into the central box, representing a program and its input data respectively. On the right side, two potential outcomes or outputs emerge from H1, labeled as yes and hello, world. This simple schematic is often used in computer science theory to discuss the limits of decidability, such as in proofs regarding the halting problem.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p335-c92",
+      "page": 335,
+      "bbox": [
+        291.6,
+        576.1,
+        678.2,
+        703.5
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page335_figure_5.png",
+      "caption": "Hypothetical program H2 halting behavior",
+      "description": "This diagram illustrates a hypothetical decider machine, denoted as H2, which analyzes a program code input labeled P. The machine outputs a binary decision represented by 'yes' if the program halts, or prints the specific string 'hello, world' along the alternative execution path. This setup demonstrates a contradiction in computability theory often used to prove the undecidability of the halting problem.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p336-c93",
+      "page": 336,
+      "bbox": [
+        289.2,
+        128.4,
+        682.9,
+        254.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page336_figure_4.png",
+      "caption": "Turing machine reduction diagram",
+      "description": "This diagram illustrates a reduction step in computability theory involving a decider machine labeled H2. An input stream representing H2 is fed into a central square box, which also contains the label H2, symbolizing a program or decider being analyzed. On the right side, two branching arrows lead to possible outputs labeled yes and hello, world. This visual setup typically demonstrates proofs of undecidability or the behavior of modified machines under reduction arguments.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p336-c94",
+      "page": 336,
+      "bbox": [
+        273.3,
+        906.0,
+        694.9,
+        1052.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page336_figure_10.png",
+      "caption": "Polynomial time reduction flowchart",
+      "description": "This diagram illustrates the structural process of a polynomial-time many-one reduction between two computational problems, P1 and P2. An instance of problem P1 is fed into a polynomial-time construction algorithm, represented by a rectangular box, which transforms it into an instance of problem P2. Subsequently, a decision algorithm, represented by a diamond-shaped conditional node, evaluates the P2 instance to output a definitive 'yes' or 'no' answer. This relationship demonstrates how solving P2 efficiently enables the effective solution of P1.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p336-c95",
+      "page": 336,
+      "bbox": [
+        273.5,
+        906.1,
+        694.8,
+        1052.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page336_figure_11.png",
+      "caption": "Polynomial time reduction flowchart",
+      "description": "This diagram illustrates the process of polynomial time reduction between two computational problems, P1 and P2. An instance of problem P1 is fed into a construction step, which transforms it into an instance of problem P2 in polynomial time. Subsequently, the constructed instance is passed to a decision procedure for P2, which yields a definitive yes or no answer for the original problem.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p341-c96",
+      "page": 341,
+      "bbox": [
+        230.7,
+        577.9,
+        740.5,
+        766.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page341_figure_4.png",
+      "caption": "Turing machine architecture and components diagram",
+      "description": "This diagram illustrates the fundamental architecture of a Turing machine, consisting of an infinite linear tape and a central processing unit labeled finite control. The tape is divided into discrete cells, each capable of holding a single symbol from the machine's alphabet, such as input symbols denoted by X and blank spaces denoted by B. A read-write head, indicated by the arrow extending from the finite control, points to the currently active cell on the tape. This structural relationship demonstrates how the machine reads, writes, and navigates across the tape during state transitions and computation processes.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p346-c97",
+      "page": 346,
+      "bbox": [
+        291.0,
+        551.5,
+        679.9,
+        920.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page346_figure_3.png",
+      "caption": "Turing machine state transition diagram",
+      "description": "This diagram illustrates the state transition graph for a Turing machine, featuring states q0 through q4 with q4 designated as an accepting state. Directed edges between states represent transitions triggered by reading a specific input symbol and writing a replacement symbol, alongside directional head movements indicated by arrows. For example, state q0 transitions to q1 upon reading 0 and writing X while moving right, demonstrating how computation steps are formally mapped within automata theory.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p348-c98",
+      "page": 348,
+      "bbox": [
+        215.5,
+        633.4,
+        756.3,
+        1034.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page348_figure_1.png",
+      "caption": "Turing machine state transition diagram",
+      "description": "This diagram illustrates the state transition graph for a Turing machine, featuring states from q0 through q6. Directed edges connect the states, labeled with input symbols and corresponding write-and-shift operations, such as reading a symbol and replacing it with a blank or specific bit while moving the tape head left or right. The start state q0 initiates the computation flow, with various self-loops and conditional branches handling the processing of binary strings and blank symbols across the machine's tape.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p353-c99",
+      "page": 353,
+      "bbox": [
+        245.7,
+        130.3,
+        723.2,
+        370.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page353_figure_4.png",
+      "caption": "Multi-track Turing machine transition structure",
+      "description": "This diagram illustrates the architectural components of a multi-track Turing machine, featuring a finite state control and multiple parallel storage tracks. The top section displays the current state variable q alongside a storage register containing symbols A, B, and C. Below this control unit, a multi-track tape layout shows three horizontal tracks labeled Track 1, Track 2, and Track 3, with corresponding column cells holding symbols X, Y, and Z. A curved arrow connects the storage register cell B to the tape column containing X, Y, and Z, symbolizing the read/write head interaction across parallel tracks during machine operations.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p357-c100",
+      "page": 357,
+      "bbox": [
+        208.5,
+        748.2,
+        758.0,
+        1099.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page357_figure_2.png",
+      "caption": "Turing machine state transition diagram",
+      "description": "This diagram illustrates the state transition graph of a Turing machine designed for string manipulation tasks. It features multiple numbered states denoted by circles, such as q0 through q12, connected by directed edges labeled with input symbols, output symbols, and head movement directions like left or right arrows. Key sections include a dashed bounding box labeled Copy that highlights a specific sub-routine or repeating pattern within the computation process. The transitions dictate how the machine reads tape symbols, overwrites them, shifts the read-write head, and alters its internal control state.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p357-c101",
+      "page": 357,
+      "bbox": [
+        278.6,
+        130.3,
+        689.6,
+        447.5
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page357_figure_3.png",
+      "caption": "Mealy machine state transition diagram",
+      "description": "This diagram illustrates a finite state transducer, specifically a Mealy machine, containing five states labeled $q_1$ through $q_5$. The start state is indicated by an incoming arrow pointing to $q_1$. Directed edges between states represent transitions triggered by specific input symbols and producing corresponding output symbols, denoted in the format input/output alongside directional arrows. Self-loops on states $q_2$, $q_3$, and $q_4$ allow the machine to remain in the same state while processing inputs under defined conditions.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p359-c102",
+      "page": 359,
+      "bbox": [
+        295.1,
+        591.4,
+        676.4,
+        889.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page359_figure_1.png",
+      "caption": "Turing machine multi-tape configuration diagram",
+      "description": "This diagram illustrates the state transitions and tape head movements in a multi-tape Turing machine. A central control unit box at the top connects via directed arrows to specific cells across multiple horizontal tape tracks, representing reading and writing operations. Each track is partitioned into discrete cells containing ellipses to denote infinitely extendable tape arrays in both directions.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p360-c103",
+      "page": 360,
+      "bbox": [
+        251.4,
+        851.1,
+        719.8,
+        1146.8
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page360_figure_3.png",
+      "caption": "Database table schema with indexed records",
+      "description": "This diagram illustrates a structured grid or database table layout containing indexed elements and relationship pointers. The upper box represents a processing unit or query pointer connected via an arrow to a specific column entry marked as X within the structured grid below. The grid rows display sequential identifiers such as A1, A2, Ai, and Aj alongside corresponding B entries, demonstrating relational data mapping or memory allocation indexing principles.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p363-c104",
+      "page": 363,
+      "bbox": [
+        282.0,
+        796.3,
+        687.6,
+        1051.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page363_figure_4.png",
+      "caption": "Queue automaton diagram with finite control",
+      "description": "This diagram illustrates the architectural components of a queue automaton, consisting of a finite control unit connected to a queue of instantaneous descriptions (IDs) and a scratch tape. The queue stores a sequence of IDs separated by delimiter symbols represented as asterisks, with one pointer marking the current read-write position labeled 'x'. Additionally, a scratch tape is positioned below the queue to provide auxiliary storage for intermediate computations during transitions.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p371-c105",
+      "page": 371,
+      "bbox": [
+        305.3,
+        129.3,
+        657.6,
+        361.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page371_figure_3.png",
+      "caption": "Pushdown automaton architecture diagram",
+      "description": "This diagram illustrates the structural components of a pushdown automaton, featuring a central finite state control unit. An input string enters from the left, while the finite state control unit interacts bidirectionally with multiple stack memories shown below as vertically stacked cells. Based on the state transitions and stack operations, the machine ultimately produces an accept or reject decision on the right side.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p378-c106",
+      "page": 378,
+      "bbox": [
+        330.6,
+        393.5,
+        632.2,
+        716.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page378_figure_5.png",
+      "caption": "Turing machine tape and processor architecture",
+      "description": "This diagram illustrates the fundamental architecture of a Turing machine, highlighting the relationship between the central processing unit and the storage tapes. The central processor contains a single storage head unit, flanked by vertically stacked tape segments extending infinitely to both the left and right sides. This spatial arrangement demonstrates how the machine reads and writes symbols sequentially across divided tape sections during computation steps.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p381-c107",
+      "page": 381,
+      "bbox": [
+        232.6,
+        128.5,
+        735.0,
+        577.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page381_figure_3.png",
+      "caption": "Random access machine architecture model",
+      "description": "This diagram illustrates the architecture of a Random Access Machine (RAM), a formal model of computation resembling a register machine. The model consists of a finite control unit connected to various registers and memory structures, including an instruction counter, a memory address register, a computer input file, and scratch memory space. Arrows from the finite control demonstrate the control flow and interaction between the instruction processing logic and the sequential memory segments containing encoded data and instructions.",
+      "section_id": "T9",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p396-c108",
+      "page": 396,
+      "bbox": [
+        318.8,
+        555.8,
+        573.0,
+        807.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page396_figure_7.png",
+      "caption": "Infinite matrix with binary elements",
+      "description": "This figure illustrates an infinite two-dimensional grid or matrix indexed by row coordinate $i$ and column coordinate $j$. Each entry in the grid contains a binary value, either 0 or 1, extending indefinitely downwards and to the right as indicated by ellipsis dots. Diagonal framing lines highlight specific structural patterns or subsets within the matrix elements, commonly used in set theory, formal languages, or diagonalization proofs.",
+      "section_id": "T10",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p399-c109",
+      "page": 399,
+      "bbox": [
+        339.2,
+        131.9,
+        631.4,
+        425.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page399_figure_2.png",
+      "caption": "Chomsky hierarchy language classes Venn diagram",
+      "description": "This diagram illustrates the hierarchical relationships between different classes of formal languages in computability theory, specifically distinguishing between recursive languages, recursively enumerable (RE) languages, and non-RE languages. The innermost circle represents recursive languages, while the surrounding ring contains languages that are RE but not recursive. The outermost region represents languages that are not recursively enumerable. Additionally, specific example points like the undecidable language $L_u$ and the diagonalization language $L_d$ are plotted to demonstrate their placement within these complexity classes.",
+      "section_id": "T10",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p401-c110",
+      "page": 401,
+      "bbox": [
+        277.2,
+        579.5,
+        688.5,
+        789.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page401_figure_2.png",
+      "caption": "Turing machine construction for union operation",
+      "description": "This diagram illustrates the machine-building construction used in computability theory to prove that the class of Turing-recognizable languages is closed under the union operation. An input string $w$ is fed into a newly constructed machine containing two component Turing machines, $M_1$ and $M_2$, running in parallel or sequentially. The diagram demonstrates how the new machine simulates both $M_1$ and $M_2$ on the same input, accepting the string if either constituent machine reaches an accepting state. This visual proves that combining recognizers preserves the ability to accept valid inputs within the larger system architecture.",
+      "section_id": "T10",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p401-c111",
+      "page": 401,
+      "bbox": [
+        260.0,
+        127.8,
+        706.4,
+        252.9
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page401_figure_4.png",
+      "caption": "Turing machine complement operation diagram",
+      "description": "This diagram illustrates the concept of language complementation for Turing machines by showing how a decider M is modified to form a new machine. An input string w is fed into the inner machine M, which produces standard accept and reject outputs. The outer box represents the negated machine, where the inner accept and reject paths are swapped as they cross the boundary, causing the overall machine to reject inputs that M accepts and accept inputs that M rejects.",
+      "section_id": "T10",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p403-c112",
+      "page": 403,
+      "bbox": [
+        295.1,
+        130.4,
+        672.8,
+        514.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page403_figure_1.png",
+      "caption": "Turing machine architecture and components diagram",
+      "description": "This figure illustrates the foundational components of a Turing machine, centered around a finite control unit that governs overall behavior. Below the control unit, multiple horizontal tape layers represent different computational channels, including an input section containing string symbols $M$ and $w$, a main working tape holding binary sequences like 0001000001010001, and a state tracking region recording configurations. Arrows connecting the finite control to these distinct layers demonstrate how read and write operations interact across the structured tape segments to execute algorithmic steps.",
+      "section_id": "T10",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p405-c113",
+      "page": 405,
+      "bbox": [
+        201.8,
+        427.8,
+        764.0,
+        586.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page405_figure_7.png",
+      "caption": "Turing machine reduction proof diagram",
+      "description": "This diagram illustrates a proof by reduction demonstrating that the diagonal language L_d is not Turing-recognizable. It shows a hypothetical Turing machine M' for deciding L_d, which takes an input string w, duplicates it to produce the string w111w, and feeds it into a hypothetical decider M for the universal language L_u. The overall machine inverts the accept and reject states of M, thereby creating a contradiction that proves L_u must be undecidable.",
+      "section_id": "T10",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p408-c114",
+      "page": 408,
+      "bbox": [
+        277.7,
+        130.2,
+        691.7,
+        376.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page408_figure_3.png",
+      "caption": "Partition refinement tree node splitting",
+      "description": "This diagram illustrates the refinement process between two partitions, $P_1$ and $P_2$, in automata minimization or equivalence checking algorithms. The left circle, representing partition block $P_1$, is divided horizontally into a 'yes' region and a 'no' region based on transition behavior. The right circle representing $P_2$ is further subdivided, showing how blocks are split into finer equivalence classes. Lines connecting the two partitions map block transitions and demonstrate how inverse image computations partition states.",
+      "section_id": "T10",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p410-c115",
+      "page": 410,
+      "bbox": [
+        259.9,
+        128.7,
+        705.6,
+        253.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page410_figure_3.png",
+      "caption": "Turing machine recognizing non-empty language",
+      "description": "This diagram illustrates the construction of a Turing machine $M$ designed to decide the non-emptiness language $L_{ne}$. The machine takes a description of a Turing machine $M_i$ as input and non-deterministically guesses a string $w$. It then simulates a universal Turing machine $U$ on the input $M_i$ and the guessed string $w$, accepting if $U$ accepts the computation.",
+      "section_id": "T10",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p410-c116",
+      "page": 410,
+      "bbox": [
+        259.0,
+        976.4,
+        706.3,
+        1100.6
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page410_figure_4.png",
+      "caption": "Turing machine construction diagram for proofs",
+      "description": "This diagram illustrates the schematic construction of a modified Turing machine M' that incorporates another machine M as a component. An input string x enters the outer machine M', which generates or processes a string w and feeds it into the inner Turing machine M. The machine M then processes w and outputs an accept or reject decision, which is subsequently relayed as the final outcome of M'. This type of block diagram is commonly used in computability theory proofs to demonstrate reductions and machine transformations.",
+      "section_id": "T10",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p413-c117",
+      "page": 413,
+      "bbox": [
+        237.6,
+        616.3,
+        726.6,
+        753.9
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page413_figure_5.png",
+      "caption": "Turing machine construction diagram",
+      "description": "This diagram illustrates the construction of a new Turing machine $M'$ from existing machines $M$ and $M_L$. The machine $M'$ takes input $x$ and incorporates a secondary machine $M$ processing input $w$, passing control signals and acceptance states to $M_L$. The arrows demonstrate the flow of computation and state transitions between the individual modular components within the enclosing machine boundary.",
+      "section_id": "T10",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p416-c118",
+      "page": 416,
+      "bbox": [
+        320.1,
+        866.2,
+        647.7,
+        934.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page416_figure_3.png",
+      "caption": "Sequential algorithm pipeline flowchart",
+      "description": "This diagram illustrates a sequential processing pipeline consisting of two algorithmic blocks connected in series. The input labeled L_u enters the first algorithm block, which processes the data to generate an intermediate output labeled MPCP. This intermediate result then serves as the input to the second algorithm block, which ultimately yields the final output labeled PCP.",
+      "section_id": "T10",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p429-c119",
+      "page": 429,
+      "bbox": [
+        389.5,
+        249.6,
+        581.1,
+        572.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page429_figure_8.png",
+      "caption": "Context-free grammar derivation tree",
+      "description": "This figure illustrates a hierarchical tree structure representing a syntactic derivation or parse tree in a formal grammar. The nodes labeled A denote non-terminal variables, while symbols like w and a represent terminal elements or strings indexed from i_1 to i_m. The recursive branching demonstrates how productions expand nested structures down to the terminal level, highlighting the hierarchical dependencies and generation process characteristic of formal language derivations.",
+      "section_id": "T10",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p442-c120",
+      "page": 442,
+      "bbox": [
+        380.8,
+        940.3,
+        589.1,
+        1148.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page442_figure_4.png",
+      "caption": "Weighted graph with highlighted cycle",
+      "description": "This figure displays a weighted undirected graph with four numbered vertices connected by edges labeled with numerical weights. The vertices are arranged in a square layout with edges connecting vertex 1 to 2, 2 to 4, 4 to 3, and 3 to 1, alongside an outer curved edge connecting vertex 1 directly to vertex 2. Certain edges between vertices 1, 3, 4, and 2 are rendered with bold lines, highlighting a specific path or cycle that traverses through the graph structure with associated edge weights of 10, 18, and 12.",
+      "section_id": "T11",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p448-c121",
+      "page": 448,
+      "bbox": [
+        273.5,
+        370.7,
+        695.5,
+        518.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page448_figure_11.png",
+      "caption": "Polynomial time reduction flowchart",
+      "description": "This diagram illustrates the fundamental concept of a polynomial-time reduction from problem P1 to problem P2 in computational complexity theory. An instance of problem P1 is taken as input and transformed via a construction phase into an instance of problem P2. Subsequently, a decision procedure evaluates the P2 instance to yield a binary yes or no outcome, thereby demonstrating how solving P2 can effectively solve P1.",
+      "section_id": "T11",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p451-c122",
+      "page": 451,
+      "bbox": [
+        414.5,
+        1003.3,
+        556.6,
+        1144.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page451_figure_4.png",
+      "caption": "3x3 grid graph network topology",
+      "description": "This figure illustrates a structured 3x3 grid graph containing nine nodes represented by white circular vertices. The vertices are arranged in a regular three-by-three matrix layout and are interconnected by straight gray edges that form four square grid cells. This topological representation demonstrates both horizontal and vertical adjacencies between neighboring nodes, commonly used in network routing and lattice models.",
+      "section_id": "T11",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p461-c123",
+      "page": 461,
+      "bbox": [
+        276.5,
+        976.3,
+        689.6,
+        1121.5
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page461_figure_5.png",
+      "caption": "Polynomial-time reduction to SAT",
+      "description": "This diagram illustrates the polynomial-time reduction process used in complexity theory to prove NP-completeness. An input string $w$ is fed into a polynomial-time converter for machine $M$, which outputs a boolean formula $E_{M,w}$. This formula is then evaluated by a SAT decider to yield a final yes or no answer, demonstrating how an arbitrary problem can be mapped to satisfiability.",
+      "section_id": "T11",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p471-c124",
+      "page": 471,
+      "bbox": [
+        218.3,
+        129.3,
+        751.9,
+        416.2
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page471_figure_7.png",
+      "caption": "Boolean expression parse tree diagram",
+      "description": "This figure illustrates the hierarchical syntax tree structure for a complex Boolean expression. The root node represents a top-level logical operation, while intermediate nodes depict nested AND and OR gates operating on variable literals. The leaves of the tree show individual variables and their negations, demonstrating how operator precedence and grouping translate directly into tree-based evaluations in boolean algebra.",
+      "section_id": "T11",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p476-c125",
+      "page": 476,
+      "bbox": [
+        272.4,
+        129.8,
+        700.4,
+        429.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page476_figure_3.png",
+      "caption": "Graph representation of CNF formula variables",
+      "description": "This figure illustrates a structured graph where vertices represent literals organized in a grid-like matrix with coordinate labels, such as [1,1] and [2,3]. Edges connect various nodes across columns and rows, representing relational constraints or clauses within a combinatorial problem. Certain nodes, like x1[1,1] and x2[2,2], feature bold borders, indicating selected or active vertices within an independent set or satisfying assignment of the graph.",
+      "section_id": "T11",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p481-c126",
+      "page": 481,
+      "bbox": [
+        224.9,
+        266.9,
+        749.3,
+        1000.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page481_figure_0.png",
+      "caption": "Directed graph component reduction gadgets",
+      "description": "This figure illustrates three distinct directed graph gadgets labeled (a), (b), and (c), which are used in graph reductions and complexity proofs. Gadget (a) demonstrates a branching structure with interleaved node pairs $b$ and $c$ connected by bidirectional edges between layers. Gadget (b) represents a sequential chain of hexagonal component blocks $H_1$ through $H_n$ linked by vertical directed arrows with a long feedback loop. Gadget (c) displays a grid-like layout of interconnected nodes labeled $r_i$ through $w_i$, incorporating directed edges and cyclical pathways to enforce specific logical constraints.",
+      "section_id": "T11",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p485-c127",
+      "page": 485,
+      "bbox": [
+        210.9,
+        269.6,
+        764.1,
+        1028.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page485_figure_0.png",
+      "caption": "Directed graph reduction gadget network",
+      "description": "This figure illustrates a complex network of directed graphs and reduction gadgets used in computational complexity proofs, such as NP-completeness reductions. The structure features interconnected nodes labeled with indices like a, b, c, r, s, t, u, v, and w, organized into repeating vertical chains and modular blocks on the right. Solid arrows represent primary internal directed edges within the gadgets, while dotted curved lines denote inter-component dependencies or variable state constraints. This configuration demonstrates how specific logical clauses or truth assignments can be mapped onto graph-theoretic structures.",
+      "section_id": "T11",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p487-c128",
+      "page": 487,
+      "bbox": [
+        400.4,
+        128.0,
+        571.5,
+        354.8
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page487_figure_2.png",
+      "caption": "Graph representation of variables with indices",
+      "description": "This figure illustrates a graph or tree-like structure composed of two vertical chains of indexed nodes. The left chain contains nodes labeled nu^(0), nu^(1), and nu^(2), while the right chain contains nodes labeled w^(0), w^(1), and w^(2). Straight line segments connect sequential nodes vertically within each chain, and a diagonal edge connects node nu^(2) on the lower-left to node w^(0) on the upper-right, demonstrating a cross-chain relationship.",
+      "section_id": "T11",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p488-c129",
+      "page": 488,
+      "bbox": [
+        278.2,
+        290.9,
+        691.5,
+        732.1
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page488_figure_2.png",
+      "caption": "NP-completeness polynomial-time reductions graph",
+      "description": "This directed graph illustrates polynomial-time many-one reductions among classic NP-complete computational problems. The central nodes represent problems such as SAT, CSAT, 3SAT, Independent Set (IS), Directed Hamiltonian Cycle (DHC), Hamiltonian Cycle (HC), and Traveling Salesperson Problem (TSP). Directed edges indicate reduction relationships, showing how the foundational NP-completeness of SAT propagates downward through intermediate problems to demonstrate the hardness of various combinatorial optimization tasks.",
+      "section_id": "T11",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p489-c130",
+      "page": 489,
+      "bbox": [
+        283.0,
+        471.3,
+        689.9,
+        758.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page489_figure_3.png",
+      "caption": "Graph reduction for SAT problem",
+      "description": "This figure illustrates a graph construction typically used in computational complexity reductions, specifically for proving NP-completeness. It displays two main sets of nodes: clause nodes labeled $c_0, c_1, c_2, \\dots, c_n$ and literal nodes labeled $x_1, \\bar{x}_1, x_2, \\bar{x}_2, \\dots, x_n, \\bar{x}_n$. The edges connecting these nodes represent logical relationships and constraints between the clauses and their constituent variables, demonstrating how Boolean satisfiability problems can be mapped onto graph structures.",
+      "section_id": "T11",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p490-c131",
+      "page": 490,
+      "bbox": [
+        270.3,
+        256.3,
+        700.8,
+        684.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page490_figure_0.png",
+      "caption": "Generalized Petersen graph structure diagram",
+      "description": "This diagram illustrates the structure of a generalized Petersen graph, specifically the Petersen graph family with twenty vertices. The graph consists of two concentric decagonal cycles containing ten vertices each, labeled one through ten on the outer ring and eleven through twenty on the inner ring. Straight edges connect corresponding vertices between the inner and outer rings, demonstrating the regular bipartite connectivity and symmetrical topology characteristic of generalized Petersen graphs in graph theory.",
+      "section_id": "T11",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p500-c132",
+      "page": 500,
+      "bbox": [
+        318.9,
+        227.6,
+        646.6,
+        562.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page500_figure_5.png",
+      "caption": "Complexity classes P, NP, and co-NP",
+      "description": "This diagram illustrates the theoretical relationships between complexity classes P, NP, and co-NP under the assumption that P does not equal NP. The central overlapping region contains polynomial-time solvable problems (P), which are enclosed within both the broader NP class and its complementary class co-NP. Distinct subsets at the top and bottom highlight NP-complete problems and their complements respectively, assuming NP is not closed under complementation. The layout visually emphasizes how these fundamental computational complexity classes intersect and separate.",
+      "section_id": "T12",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p503-c133",
+      "page": 503,
+      "bbox": [
+        293.5,
+        130.3,
+        676.4,
+        458.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page503_figure_4.png",
+      "caption": "Linear bounded automaton tape memory model",
+      "description": "This diagram illustrates the architectural model of a linear bounded automaton, featuring a finite control unit interacting with a linear storage tape. The tape contains an input string $w$ occupying $n$ cells, while the total region marked as 'cells ever used' is bounded by a polynomial function $p(n)$. This representation emphasizes the restricted workspace characteristic of linear bounded automata, where the tape space available for computation is strictly proportional to the length of the input.",
+      "section_id": "T12",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p507-c134",
+      "page": 507,
+      "bbox": [
+        307.6,
+        129.2,
+        664.0,
+        483.0
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page507_figure_1.png",
+      "caption": "Complexity class inclusion diagram",
+      "description": "This diagram illustrates the hierarchical containment relationships among various computational complexity classes, assuming P does not equal NP. The innermost circle represents P, which is strictly contained within both NP and co-NP. These classes are further enclosed within larger domains such as Recursive problems and ultimately bounded by PSPACE equals NPSPACE. The overlapping regions highlight how polynomial-time verifiable problems relate to their complementary counterparts and wider decidable spaces.",
+      "section_id": "T12",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p518-c135",
+      "page": 518,
+      "bbox": [
+        257.6,
+        430.3,
+        713.2,
+        775.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page518_figure_3.png",
+      "caption": "Probabilistic Turing machine architecture diagram",
+      "description": "This diagram illustrates the theoretical model of a probabilistic Turing machine, consisting of a central finite control unit linked to multiple functional components. The finite control governs an input tape containing the problem instance, a dedicated tape for generating random bits represented as binary sequences, and one or more scratch tapes used for intermediate computations. Arrows extending from the finite control demonstrate how the machine interacts with and accesses each distinct tape during its execution steps to compute randomized algorithms.",
+      "section_id": "T12",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p520-c136",
+      "page": 520,
+      "bbox": [
+        172.8,
+        693.1,
+        799.0,
+        847.7
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page520_figure_7.png",
+      "caption": "Turing machine state transition table",
+      "description": "This table defines the transition function for a Turing machine with states q0 through q4, where q0 is the initial state and q4 is the accepting state. The rows represent current states while the columns correspond to scanned input symbols ranging over binary combinations and blank markers. Each table entry specifies the next state along with a symbol write operation and a tape head movement direction such as left or right.",
+      "section_id": "T12",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p527-c137",
+      "page": 527,
+      "bbox": [
+        379.0,
+        333.5,
+        592.1,
+        717.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page527_figure_3.png",
+      "caption": "Complexity classes subset containment diagram",
+      "description": "This diagram illustrates the hierarchical relationships and set inclusions among fundamental computational complexity classes, assuming $P \\neq NP$. The innermost circle represents the class $P$, which is fully contained within $ZPP$, and subsequently within $RP$, $co-RP$, $NP$, and $co-NP$. The diagram visually highlights the symmetries between randomized complexity classes like $RP$ and $co-RP$, as well as their bounds within deterministic and non-deterministic polynomial time classes.",
+      "section_id": "T12",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p530-c138",
+      "page": 530,
+      "bbox": [
+        382.4,
+        723.9,
+        589.9,
+        874.4
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page530_figure_8.png",
+      "caption": "Group multiplication table of order six",
+      "description": "This figure displays a 6x6 grid representing a binary operation table, similar to a Cayley table in abstract algebra, with row and column headers ranging from 1 to 6. A thick vertical line separates the row headers on the left from the interior matrix entries, while a horizontal line separates the column headers from the main body. Each cell inside the grid contains a single integer between 1 and 6, illustrating how pairs of elements combine under the operation to yield another element within the set.",
+      "section_id": "T12",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p531-c139",
+      "page": 531,
+      "bbox": [
+        398.9,
+        128.3,
+        573.1,
+        254.9
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page531_figure_12.png",
+      "caption": "Modular arithmetic multiplication table",
+      "description": "This figure displays a mathematical table illustrating a binary operation on a set of integers from 1 to 5, separated by a vertical bar and horizontal rule. The row and column headers correspond to inputs 1 through 5, while the internal cells contain resulting numerical values such as products or modular arithmetic outputs. The layout emphasizes structural symmetry and patterns characteristic of finite algebraic structures.",
+      "section_id": "T12",
+      "content_text": ""
+    },
+    {
+      "id": "fig-p536-c140",
+      "page": 536,
+      "bbox": [
+        269.6,
+        226.1,
+        692.4,
+        417.3
+      ],
+      "image_path": "E:\\Projects\\PDF_extractor\\SmartTA_fork\\Smart_Teaching_Assistance\\data\\courses\\1c2106dc6d41c390\\figures\\1c2106dc6d41c390_page536_figure_6.png",
+      "caption": "Hierarchical tree structure with labeled nodes",
+      "description": "This diagram illustrates a hierarchical tree structure with nodes organized across multiple levels, starting from a root level down to level two and beyond. The root node, labeled p, branches out to several child nodes denoted as q1, q2, through qj at level 1. These nodes further branch downward to subsequent generations at level 2, demonstrating parent-child relationships and recursive branching patterns commonly used in data structures, graph theory, and parsing algorithms.",
+      "section_id": "T12",
+      "content_text": ""
+    }
+  ]
+}

@@ -332,7 +332,102 @@ def _build():
                 if v:
                     st.caption(f"{k}: {v:,}" if isinstance(v, int) else f"{k}: {v}")
 
+        _render_device_toggle()
         _render_footer()
+
+
+def _render_device_toggle():
+    """CPU / GPU toggle for the local ML models (YOLO, BGE-M3, CLIP, reranker).
+
+    Setting persists in:
+      - os.environ['SMARTTA_DEVICE']  (consumed by the embedders + YOLO)
+      - st.session_state['device']    (consumed by the UI itself)
+
+    Flipping the toggle drops the cached embedders so the next ingest
+    or query reloads on the new device. We don't try to live-move
+    already-loaded CUDA tensors to CPU or vice versa -- that needs a
+    full process restart for stable behavior.
+    """
+    import os
+    import torch
+
+    cuda_ok = False
+    try:
+        cuda_ok = bool(torch.cuda.is_available())
+        if cuda_ok:
+            gpu_name = torch.cuda.get_device_name(0)
+        else:
+            gpu_name = ""
+    except Exception:
+        gpu_name = ""
+
+    current = st.session_state.get("device") or os.environ.get("SMARTTA_DEVICE", "")
+    if not current:
+        current = "cuda" if cuda_ok else "cpu"
+
+    st.markdown("---")
+    st.markdown("##### ⚙️ Compute Device")
+    if cuda_ok:
+        st.caption(f"GPU available: {gpu_name}")
+    else:
+        st.caption("No CUDA GPU detected — CPU only.")
+
+    # Two-button row
+    c1, c2 = st.columns(2)
+    with c1:
+        cpu_active = (current == "cpu")
+        if st.button(
+            "🖥️ CPU",
+            use_container_width=True,
+            type="primary" if cpu_active else "secondary",
+            key="sb_dev_cpu",
+            help="Force CPU for YOLO + all embedding models. Most stable. Recommended default.",
+        ):
+            os.environ["SMARTTA_DEVICE"] = "cpu"
+            st.session_state["device"] = "cpu"
+            # Drop cached models so the next call reloads on CPU
+            try:
+                from Smart_Teaching_Assistance.rag.embeddings import reset_caches
+                reset_caches()
+            except Exception:
+                pass
+            st.rerun()
+    with c2:
+        gpu_disabled = not cuda_ok
+        gpu_active = (current == "cuda") and cuda_ok
+        if st.button(
+            "🚀 GPU",
+            use_container_width=True,
+            type="primary" if gpu_active else "secondary",
+            disabled=gpu_disabled,
+            key="sb_dev_gpu",
+            help=("Force CUDA for YOLO + all embedding models. Faster for large PDFs and "
+                  "long RAG queries, but BGE-M3 + CLIP need ~2GB VRAM. NOTE: YOLO detection "
+                  "on single images is actually slower on small GPUs (launch overhead > "
+                  "compute) -- only the embedding models reliably benefit from CUDA."),
+        ):
+            os.environ["SMARTTA_DEVICE"] = "cuda"
+            st.session_state["device"] = "cuda"
+            try:
+                from Smart_Teaching_Assistance.rag.embeddings import reset_caches
+                reset_caches()
+            except Exception:
+                pass
+            st.rerun()
+
+    # Show the active device + VRAM
+    if cuda_ok:
+        try:
+            vram_used = torch.cuda.memory_allocated() / 1024**3
+            vram_total = torch.cuda.get_device_properties(0).total_memory / 1024**3
+            st.caption(
+                f"Active: **{current.upper()}** · VRAM: "
+                f"{vram_used:.1f} / {vram_total:.1f} GB"
+            )
+        except Exception:
+            st.caption(f"Active: **{current.upper()}**")
+    else:
+        st.caption(f"Active: **{current.upper()}**")
 
 
 def _render_footer():

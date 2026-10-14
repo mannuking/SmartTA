@@ -76,16 +76,24 @@ def _find_model() -> Optional[Path]:
 
 
 def _select_device() -> str:
-    """Honor the PDF_EXTRACT_DEVICE env var, else default to cpu.
+    """Pick torch device for YOLO inference.
+
+    Precedence:
+      1. SMARTTA_DEVICE env var (the app-wide toggle from the UI)
+      2. PDF_EXTRACT_DEVICE env var (legacy, YOLO-specific override)
+      3. Default: cpu
 
     The DocLayout-YOLO model is small (~40MB) and the single-image
     inference is dominated by GPU launch overhead rather than
     compute. On RTX 3070 + cu121, CPU is consistently 1.2-1.4x faster
     than CUDA for the per-page workload we use here. Batching could
     flip this, but we render-and-predict page-by-page for progress
-    feedback. Default to CPU; let power users opt in.
+    feedback. Default to CPU; let power users opt in via the toggle.
     """
-    env = os.environ.get("PDF_EXTRACT_DEVICE", "").strip().lower()
+    env = (
+        os.environ.get("SMARTTA_DEVICE", "").strip().lower()
+        or os.environ.get("PDF_EXTRACT_DEVICE", "").strip().lower()
+    )
     if env in ("cpu", "cuda", "mps"):
         return env
     if env == "1":

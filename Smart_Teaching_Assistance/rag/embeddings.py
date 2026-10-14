@@ -60,7 +60,38 @@ def _cuda_available() -> bool:
 
 
 def _device() -> str:
+    """Resolve which torch device the embedders should use.
+
+    Precedence:
+      1. SMARTTA_DEVICE env var (set by the UI's CPU/GPU toggle or by
+         `uv run sta` CLI flags). Must be one of 'cpu', 'cuda', 'mps'.
+      2. CUDA availability check. If a GPU is present, default to 'cuda'.
+      3. Fall back to 'cpu'.
+
+    The env var is intentionally read on every call, not cached, so the
+    UI can flip the toggle and the next embedder load picks it up.
+    """
+    import os
+    forced = os.environ.get("SMARTTA_DEVICE", "").strip().lower()
+    if forced in ("cpu", "cuda", "mps"):
+        # If the user asked for cuda but no GPU is actually present, fall
+        # back to cpu instead of crashing on .to("cuda").
+        if forced == "cuda" and not _cuda_available():
+            return "cpu"
+        return forced
     return "cuda" if _cuda_available() else "cpu"
+
+
+def reset_caches():
+    """Drop cached models so the next get_*_embedder() reloads on the
+    current device. Call this from the UI when the user flips the
+    CPU/GPU toggle, or from tests."""
+    global _text_model, _image_model, _rerank_model, _text_dim, _image_dim
+    _text_model = None
+    _image_model = None
+    _rerank_model = None
+    _text_dim = None
+    _image_dim = None
 
 
 def get_text_embedder():

@@ -139,22 +139,43 @@ class LessonPlanMixin:
         return None
 
     def _parse_chapter_blueprint(self, raw: str) -> Dict[str, Dict]:
-        """Parse chapter blueprint JSON into section data keyed by topic ID."""
+        """Parse chapter blueprint JSON into section data keyed by topic ID.
+
+        Lenient: accepts several common aliases the LLM uses
+        interchangeably -- 'id' or 'topic_id' or 'tid' for the
+        section ID, 'name' as alias for 'title', 'description',
+        'prompt', 'content', or 'teaching_prompt' as alias for
+        'mega_prompt'. Sections whose ID is missing fall back to
+        positional naming (T1_0, T1_1, ...) so a partially-malformed
+        response still yields SOMETHING rather than an empty dict.
+        """
         payload = self._extract_json_payload(raw)
         if not isinstance(payload, dict):
             return {}
 
-        sections = payload.get("sections", [])
+        # 'sections' is the documented key, but accept 'topics' or
+        # 'nodes' as common LLM drift.
+        sections = (
+            payload.get("sections")
+            or payload.get("topics")
+            or payload.get("nodes")
+            or []
+        )
         if not isinstance(sections, list):
             return {}
 
         parsed: Dict[str, Dict] = {}
-        for sec in sections:
+        for idx, sec in enumerate(sections):
             if not isinstance(sec, dict):
                 continue
-            sid = str(sec.get("id", "")).strip()
-            if not sid:
-                continue
+            # Pull ID from any of the common aliases; if missing,
+            # use the index so we at least emit something.
+            sid = (
+                str(sec.get("id", "")).strip()
+                or str(sec.get("topic_id", "")).strip()
+                or str(sec.get("tid", "")).strip()
+                or f"_section_{idx}"
+            )
 
             raw_struct = sec.get("structured_content", {})
             if not isinstance(raw_struct, dict):
@@ -169,10 +190,18 @@ class LessonPlanMixin:
             if not isinstance(contract, dict):
                 contract = {}
 
-            teaching_prompt = str(sec.get("teaching_prompt", "")).strip()
-            if not teaching_prompt:
-                teaching_prompt = str(sec.get("mega_prompt", "")).strip()
-            title = str(sec.get("title", "")).strip()
+            # teaching_prompt: accept several aliases
+            teaching_prompt = (
+                str(sec.get("teaching_prompt", "")).strip()
+                or str(sec.get("mega_prompt", "")).strip()
+                or str(sec.get("prompt", "")).strip()
+                or str(sec.get("description", "")).strip()
+                or str(sec.get("content", "")).strip()
+            )
+            title = (
+                str(sec.get("title", "")).strip()
+                or str(sec.get("name", "")).strip()
+            )
 
             parsed[sid] = {
                 "id": sid,
@@ -183,6 +212,42 @@ class LessonPlanMixin:
             }
 
         return parsed
+
+    def _synthesize_chapter_blueprint(self, chapter_topic: Dict) -> Dict[str, Dict]:
+        """Build a fallback section_map from the roadmap tree alone.
+
+        Used when the AI chapter-blueprint call returns empty. Every
+        topic in the chapter gets a stub section with its own ID so
+        the rest of the pipeline can still walk the tree without
+        falling back to the slower per-topic path.
+        """
+        result: Dict[str, Dict] = {}
+
+        def _walk(node: Dict):
+            tid = node.get("id", "")
+            title = node.get("title", "Untitled")
+            if tid:
+                result[tid] = {
+                    "id": tid,
+                    "title": title,
+                    "structured_content": self._empty_structured_content(),
+                    "teaching_prompt": (
+                        f"Cover the topic '{title}' (id={tid}) at "
+                        f"the depth appropriate for the parent chapter. "
+                        f"Stay within the scope of this node -- siblings "
+                        f"and parent/child topics have their own sections."
+                    ),
+                    "coverage_contract": {
+                        "scope": f"Topic {tid} only",
+                        "include": [title],
+                        "exclude_from_siblings": True,
+                    },
+                }
+            for child in node.get("subtopics", []) or []:
+                _walk(child)
+
+        _walk(chapter_topic)
+        return result
 
     def _build_tree_from_blueprint(
         self,
@@ -485,7 +550,17 @@ Be comprehensive and scholarly. Content within each tag should use Markdown form
                         temperature=temperature,
                     )
                     if not section_map:
-                        raise ValueError(f"Empty chapter blueprint for {chapter_id}")
+                        # LLM returned an empty/invalid blueprint. Fall
+                        # back to a synthesized stub map from the
+                        # roadmap tree itself, so we still use the
+                        # chapter-level path (faster) instead of
+                        # dropping to per-topic generation.
+                        logger.warning(
+                            "Chapter blueprint empty for %s; using synthesized "
+                            "stub map from roadmap tree (faster than per-topic)",
+                            chapter_id,
+                        )
+                        section_map = self._synthesize_chapter_blueprint(topic)
 
                     chunk = self._build_tree_from_blueprint(
                         topic,

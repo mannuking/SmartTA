@@ -421,7 +421,14 @@ class GenerativeModel:
 
     def _call_with_fallback(self, *, prompt_text: str, images: Optional[list],
                             max_tokens: int, temperature: float) -> str:
-        """Try MiniMax first; on 402/429/5xx or forced Gemini, fall back."""
+        """Try MiniMax first; on 402/429/5xx or forced Gemini, fall back.
+
+        If MiniMax returns 401 (bad/expired key), we permanently flip
+        _State.force_gemini=True for this process. Otherwise every single
+        request would log the same auth-failure warning and pay the
+        network round-trip just to fall back to Gemini. Same logic for
+        403 (forbidden -- the key works for nothing on this account).
+        """
         use_gemini = _State.force_gemini or bool(images)  # vision always goes to Gemini
 
         if not use_gemini:
@@ -431,7 +438,20 @@ class GenerativeModel:
                 raw = _post_anthropic(messages, max_tokens=max_tokens, temperature=temperature)
                 return _extract_text_from_anthropic(raw)
             except _MiniMaxHTTPError as e:
-                logger.warning("MiniMax call failed (%s); falling back to Gemini", e)
+                # 401 / 403: the API key is dead for this account. Stop
+                # trying it for the rest of the process -- every other
+                # call would just re-fail the same way.
+                err_str = str(e)
+                if "HTTP 401" in err_str or "HTTP 403" in err_str:
+                    if not _State.force_gemini:
+                        logger.warning(
+                            "MiniMax call failed (%s); disabling MiniMax for this "
+                            "session and routing all subsequent calls to Gemini",
+                            e,
+                        )
+                    _State.force_gemini = True
+                else:
+                    logger.warning("MiniMax call failed (%s); falling back to Gemini", e)
             except Exception as e:
                 logger.warning("MiniMax call errored (%s: %s); falling back to Gemini", type(e).__name__, e)
 

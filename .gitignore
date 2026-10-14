@@ -38,3 +38,5 @@ dist/
 build/
 *.egg-info/
 logs_ingest_*.log
+data/courses/
+logs_*.log

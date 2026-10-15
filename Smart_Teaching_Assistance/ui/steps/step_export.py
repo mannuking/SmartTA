@@ -132,6 +132,30 @@ def _ensure_notes_for_export():
             if answer_key:
                 st.session_state.answer_key_text = answer_key
             st.session_state.detailed_notes_generated = True
+
+            # If the user uploaded a PDF, auto-place the best-matching
+            # extracted figure at each sub-section. Without this, the
+            # exported PDF has zero images -- the figure_block elements
+            # never get added on the Skip-to-Export path because
+            # place_figures_into_notes was only called from Step 4's
+            # background worker. Now we call it here too.
+            if st.session_state.get("course_corpus") is not None:
+                try:
+                    from Smart_Teaching_Assistance.ui.rag_bridge import place_figures_into_notes
+                    notes_data = place_figures_into_notes(notes_data)
+                    st.session_state.all_notes_data = notes_data
+                    placed = sum(
+                        1 for n in notes_data for e in n.get("elements", [])
+                        if e.get("type") == "figure_block"
+                    )
+                    if placed:
+                        log_activity(
+                            f"Placed {placed} figure(s) from the uploaded PDF into the notes.",
+                            icon="🖼️", level="success",
+                        )
+                except Exception as fig_err:
+                    logger.debug(f"figure placement skipped: {fig_err}")
+
             _render("✅ Notes ready", f"loaded {len(notes_data)} topic blocks", 1.0)
             progress.empty()
             log_activity(

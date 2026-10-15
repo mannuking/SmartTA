@@ -14,6 +14,9 @@ from typing import Optional, Dict, List
 logger = logging.getLogger(__name__)
 
 # ── Pre-compiled regex patterns ──────────────────────────────────────────────
+# All backslashes are written as a raw-string 'r"..."' which keeps the
+# source code free of escape conflicts. If you change these patterns,
+# keep the leading r on the string literal.
 RE_DOLLAR = re.compile(r'(?<!\\)\$')
 RE_LATEX_CMD = re.compile(r'\\(?:text|textbf|mathbf|mathrm|textit|operatorname)\{([^}]*)\}')
 RE_FRAC = re.compile(r'\\frac\{([^}]*)\}\{([^}]*)\}')
@@ -29,49 +32,137 @@ RE_MD_LINK = re.compile(r'\[([^\]]+)\]\([^\)]+\)')
 
 # ── Common LaTeX to Unicode Mapping ──────────────────────────────────────────
 LATEX_SYMBOL_MAP = {
-    '\\lambda': 'λ', '\\sigma': 'σ', '\\Sigma': 'Σ', '\\Lambda': 'Λ', 
-    '\\alpha': 'α', '\\beta': 'β', '\\gamma': 'γ', '\\delta': 'δ',
-    '\\Delta': 'Δ', '\\epsilon': 'ε', '\\theta': 'θ', '\\pi': 'π',
-    '\\phi': 'ϕ', '\\psi': 'ψ', '\\omega': 'ω', '\\Omega': 'Ω',
-    '\\tau': 'τ', '\\rho': 'ρ', '\\mu': 'μ', '\\eta': 'η',
-    '\\times': '×', '\\cdot': '·', '\\pm': '±', '\\leq': '≤',
-    '\\geq': '≥', '\\neq': '≠', '\\approx': '≈', '\\infty': '∞',
-    '\\rightarrow': '→', '\\leftarrow': '←', '\\partial': '∂',
-    '\\nabla': '∇', '\\sum': '∑', '\\prod': '∏', '\\int': '∫',
-    '\\forall': '∀', '\\exists': '∃', '\\in': '∈', '\\subset': '⊂',
-    '\\cup': '∪', '\\cap': '∩', '\\therefore': '∴', '\\because': '∵',
+    r'\lambda': 'λ', r'\sigma': 'σ', r'\Sigma': 'Σ', r'\Lambda': 'Λ',
+    r'\alpha': 'α', r'\beta': 'β', r'\gamma': 'γ', r'\delta': 'δ',
+    r'\Delta': 'Δ', r'\epsilon': 'ε', r'\varepsilon': 'ε', r'\Epsilon': 'Ε',
+    r'\theta': 'θ', r'\pi': 'π', r'\Pi': 'Π',
+    r'\phi': 'ϕ', r'\Phi': 'Φ', r'\psi': 'ψ', r'\Psi': 'Ψ',
+    r'\omega': 'ω', r'\Omega': 'Ω', r'\Gamma': 'Γ',
+    r'\tau': 'τ', r'\rho': 'ρ', r'\mu': 'μ', r'\eta': 'η',
+    r'\times': '×', r'\cdot': '·', r'\pm': '±', r'\mp': '∓',
+    r'\leq': '≤', r'\le': '≤', r'\geq': '≥', r'\ge': '≥',
+    r'\neq': '≠', r'\ne': '≠', r'\approx': '≈', r'\equiv': '≡',
+    r'\sim': '~', r'\simeq': '≃', r'\cong': '≅', r'\propto': '∝',
+    r'\infty': '∞', r'\partial': '∂', r'\nabla': '∇',
+    r'\rightarrow': '→', r'\to': '→',
+    r'\leftarrow': '←',
+    r'\Rightarrow': '⇒', r'\Leftarrow': '⇐',
+    r'\leftrightarrow': '↔',
+    r'\uparrow': '↑', r'\downarrow': '↓',
+    r'\sum': '∑', r'\prod': '∏', r'\int': '∫', r'\iint': '∬',
+    r'\bigcup': '∪', r'\bigcap': '∩', r'\bigoplus': '⊕',
+    r'\forall': '∀', r'\exists': '∃',
+    r'\in': '∈', r'\notin': '∉',
+    r'\subset': '⊂', r'\supset': '⊃',
+    r'\subseteq': '⊆', r'\supseteq': '⊇',
+    r'\cup': '∪', r'\cap': '∩',
+    r'\emptyset': '∅', r'\varnothing': '∅',
+    r'\therefore': '∴', r'\because': '∵',
+    r'\ldots': '…', r'\cdots': '⋯', r'\dots': '…',
+    r'\langle': '⟨', r'\rangle': '⟩',
+    r'\neg': '¬', r'\lnot': '¬', r'\land': '∧', r'\wedge': '∧',
+    r'\lor': '∨', r'\vee': '∨',
+    r'\oplus': '⊕', r'\ominus': '⊖', r'\otimes': '⊗',
+    r'\circ': '∘', r'\bullet': '•', r'\star': '⋆',
+    r'\mid': '|', r'\nmid': '∤',
+    r'\parallel': '∥',
+    r'\setminus': '\\',
+    r'\lceil': '⌈', r'\rceil': '⌉',
+    r'\lfloor': '⌊', r'\rfloor': '⌋',
+    r'\triangle': '△', r'\bigtriangleup': '△',
+    r'\surd': '√',
 }
 
-def clean_latex(text: str) -> str:
-    """Convert LaTeX math notation to readable plain text with Unicode symbols."""
+
+def clean_latex(text):
+    """Convert LaTeX math notation to readable plain text with Unicode symbols.
+
+    The original implementation only handled a narrow subset and missed
+    the commands the LLM most often produces (\\hat, \\overline, \\lceil,
+    \\bigcup, etc.). The new version:
+
+      1. Replaces the LATEX_SYMBOL_MAP commands with Unicode symbols
+      2. Drops the styling prefixes (\\mathcal, \\mathbf, ...) but keeps
+         the content
+      3. Strips outer braces after substitution
+      4. Handles hat/bar/tilde accents by dropping the accent command
+         (\\hat{q} -> just q -- the math renderer will use the proper hat)
+      5. Cleans up leftover math delimiters
+    """
     if not text:
         return text
-    
-    # Remove math delimiters
+
+    # Drop display delimiters
     text = text.replace('$$', '')
     text = RE_DOLLAR.sub('', text)
-    
-    # Handle fractions and commands
-    text = RE_LATEX_CMD.sub(r'\1', text)
-    text = RE_FRAC.sub(r'\1/\2', text)
-    
-    # Replace LaTeX commands with Unicode symbols
-    for cmd, symbol in LATEX_SYMBOL_MAP.items():
-        text = text.replace(cmd, symbol)
-    
-    # Handle superscripts and subscripts
-    text = RE_SUPERSCRIPT.sub(r'^(\1)', text)
-    text = RE_SUBSCRIPT.sub(r'_\1', text)
-    text = RE_SQRT.sub(r'√(\1)', text)
-    
-    # Clean up whitespace and braces
-    text = RE_LATEX_WS.sub(' ', text)
-    text = text.replace('{', '').replace('}', '')
-    text = RE_MULTI_SPACE.sub(' ', text)
-    
-    return text
 
-def clean_markdown(text: str) -> str:
+    # Drop styling prefixes (the content inside the braces is preserved).
+    text = RE_LATEX_CMD.sub(r'\1', text)
+
+    # Replace LaTeX commands with Unicode symbols. Sort by length
+    # descending so \textbf eats before \text.
+    for cmd, symbol in sorted(LATEX_SYMBOL_MAP.items(), key=lambda kv: -len(kv[0])):
+        text = text.replace(cmd, symbol)
+
+    # Drop accent commands -- the actual letter inside is preserved;
+    # the math renderer (mathtext) handles the visual accent, while
+    # this plain-text fallback just keeps the letter.
+    text = re.sub(
+        r'\\(?:hat|bar|tilde|vec|dot|ddot|acute|grave|check|breve'
+        r'|overline|underline|widehat|widetilde)\{([^}]*)\}',
+        r'\1', text,
+    )
+
+    # Fractions: \frac{a}{b} -> a/b. Recurse to handle nested.
+    while True:
+        new_text = RE_FRAC.sub(r'\1/\2', text)
+        if new_text == text:
+            break
+        text = new_text
+
+    # sqrt: \sqrt{x} -> √(x)
+    text = RE_SQRT.sub(r'√(\1)', text)
+
+    # Defensive: drop any ceiling/floor command names still left
+    text = text.replace(r'\lceil', '⌈').replace(r'\rceil', '⌉')
+    text = text.replace(r'\lfloor', '⌊').replace(r'\rfloor', '⌋')
+
+    # Superscripts: x^{ab} -> ^(ab); x^2 -> ^(2)
+    text = RE_SUPERSCRIPT.sub(r'^(\1)', text)
+    text = re.sub(r'\^([A-Za-z0-9])(?!\{)', r'^(\1)', text)
+
+    # Subscripts: x_{ab} -> _(ab); x_i -> _(i)
+    text = RE_SUBSCRIPT.sub(r'_\1', text)
+    text = re.sub(r'_([A-Za-z0-9])(?!\{)', r'_(\1)', text)
+
+    # Strip outer braces that wrap a single balanced expression
+    # (e.g. {q_0} -> q_0). Nested or partial ones are left for later.
+    def _strip_matched_outer(s):
+        if not (s.startswith('{') and s.endswith('}')):
+            return s
+        depth = 0
+        for i, ch in enumerate(s):
+            if ch == '{':
+                depth += 1
+            elif ch == '}':
+                depth -= 1
+                if depth == 0 and i < len(s) - 1:
+                    return s  # matching close is not at the very end
+        return s[1:-1] if depth == 0 else s
+    text = _strip_matched_outer(text)
+
+    # Strip ALL remaining unmatched braces (leftover from dropped commands)
+    text = re.sub(r'\{', '(', text)
+    text = re.sub(r'\}', ')', text)
+
+    # Normalize LaTeX whitespace commands and collapse spaces
+    text = RE_LATEX_WS.sub(' ', text)
+    text = RE_MULTI_SPACE.sub(' ', text)
+
+    return text.strip()
+
+
+def clean_markdown(text):
     """Strip markdown artifacts while keeping text readable."""
     if not text: return ""
     text = RE_MD_BOLD_ITALIC.sub('', text)
@@ -82,7 +173,8 @@ def clean_markdown(text: str) -> str:
     text = clean_latex(text)
     return text.strip()
 
-def md_to_reportlab(text: str) -> str:
+
+def md_to_reportlab(text):
     """Convert markdown to ReportLab-friendly XML (<b>, <i>)."""
     if not text:
         return ""
@@ -119,21 +211,25 @@ def md_to_reportlab(text: str) -> str:
 
     return text.strip()
 
-def escape_xml(text: str) -> str:
+
+def escape_xml(text):
     """Escape XML entities for ReportLab Paragraphs."""
     if not text: return ""
     return text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 
-def pdf_safe(text: str) -> str:
+
+def pdf_safe(text):
     """Clean markdown AND escape XML entities for ReportLab Paragraphs."""
     text = clean_markdown(text)
     return escape_xml(text)
 
-def topic_number(topic_id: str) -> str:
+
+def topic_number(topic_id):
     """Convert a topic ID like 'T1', 'T1.2' to '1', '1.2'."""
     return re.sub(r'^[A-Za-z]+', '', topic_id)
 
-def topic_display_label(topic_id: str, title: str) -> str:
+
+def topic_display_label(topic_id, title):
     """Build a display label with numbering."""
     num = topic_number(topic_id)
     depth = topic_id.count('.')
@@ -141,7 +237,8 @@ def topic_display_label(topic_id: str, title: str) -> str:
         return f"Chapter {num}: {title}"
     return f"{num}  {title}"
 
-def looks_like_json(text: str) -> bool:
+
+def looks_like_json(text):
     """Return True if text appears to be raw JSON."""
     stripped = text.strip()
     if stripped.startswith(('{', '[')) and stripped.endswith(('}', ']')):
@@ -150,7 +247,8 @@ def looks_like_json(text: str) -> bool:
         return True
     return False
 
-def sanitize_json_content(text: str) -> str:
+
+def sanitize_json_content(text):
     """Extract readable text from content that accidentally contains JSON."""
     pieces = []
     for m in re.finditer(r'"content"\s*:\s*"((?:[^"\\]|\\.)*)"', text):
@@ -167,7 +265,8 @@ def sanitize_json_content(text: str) -> str:
     cleaned = re.sub(r'\n{3,}', '\n\n', cleaned).strip()
     return clean_markdown(cleaned) if cleaned else text
 
-def download_image_to_temp(url: str) -> Optional[str]:
+
+def download_image_to_temp(url):
     """Download an image from a URL to a temporary file."""
     try:
         response = requests.get(url, timeout=10, stream=True)
@@ -181,7 +280,8 @@ def download_image_to_temp(url: str) -> Optional[str]:
         logger.warning(f"Failed to download image from {url}: {e}")
         return None
 
-def ensure_docx_compatible(img_path: str) -> str:
+
+def ensure_docx_compatible(img_path):
     """Convert unsupported image formats to PNG for python-docx."""
     try:
         from PIL import Image as PILImage
@@ -195,6 +295,7 @@ def ensure_docx_compatible(img_path: str) -> str:
         pass
     return img_path
 
-def remove_tags(content: str) -> str:
+
+def remove_tags(content):
     """Remove tag markers from content."""
     return re.sub(r'\[(EXAMPLE|ANALOGY|APPLICATION|CASE_STUDY):[^\]]+\]', '', content)

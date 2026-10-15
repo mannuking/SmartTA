@@ -26,10 +26,11 @@ except ImportError:
     pass
 
 from .utils import (
-    clean_markdown, topic_display_label, looks_like_json, 
-    sanitize_json_content, download_image_to_temp, 
+    clean_markdown, topic_display_label, looks_like_json,
+    sanitize_json_content, download_image_to_temp,
     pdf_safe, escape_xml, remove_tags, md_to_reportlab
 )
+from .equation_renderer import render_equation_to_png, get_image_size
 
 logger = logging.getLogger(__name__)
 
@@ -216,20 +217,43 @@ class PdfEngine:
             story.append(t)
             story.append(Spacer(1, 0.1*inch))
         elif etype == "equation":
-            clean_math = content.replace('$', '').strip()
-            # Wrap equation in a subtle box
-            inner_text = md_to_reportlab(clean_math)
-            data = [[Paragraph(inner_text, styles['Math'])]]
-            t = Table(data, colWidths=[6.0*inch])
-            t.setStyle(TableStyle([
-                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F8F9F9")),
-                ('BOX', (0,0), (-1,-1), 0.5, colors.HexColor("#D5DBDB")),
-                ('TOPPADDING', (0,0), (-1,-1), 5),
-                ('BOTTOMPADDING', (0,0), (-1,-1), 5),
-            ]))
-            story.append(Spacer(1, 0.1*inch))
-            story.append(t)
-            story.append(Spacer(1, 0.1*inch))
+            # Render the LaTeX as a transparent PNG via matplotlib's
+            # mathtext engine. Old behavior was to dump the LaTeX as
+            # raw italic Times text, which is why \\hat{\\delta} showed
+            # up as the literal backslash-words in the exported PDF.
+            #
+            # The PNG is cached in a per-process directory so identical
+            # equations across topics don't re-render. We size the
+            # image proportionally to its native pixel width, capped at
+            # 5.5 inches wide so very long equations stay on one line.
+            clean_math = content.strip()
+            # Strip any surrounding $...$ / $$...$$ the LLM might add
+            clean_math = clean_math.replace("$$", "").strip("$").strip()
+            if not clean_math:
+                clean_math = "(empty equation)"
+
+            img_path = render_equation_to_png(clean_math, fontsize=14, dpi=220)
+            if img_path and os.path.isfile(img_path):
+                # Compute display size: aim for 5.0 inches wide, scale
+                # height proportionally to maintain aspect.
+                native_w, native_h = get_image_size(img_path)
+                if native_w > 0 and native_h > 0:
+                    max_w_in = 5.0
+                    disp_w = min(native_w / 220.0, max_w_in)
+                    disp_h = disp_w * (native_h / native_w)
+                else:
+                    disp_w, disp_h = 4.0, 0.5
+                try:
+                    img = RLImage(img_path, width=disp_w * inch, height=disp_h * inch)
+                    story.append(Spacer(1, 0.10 * inch))
+                    story.append(img)
+                    story.append(Spacer(1, 0.10 * inch))
+                except Exception as e:
+                    logger.error(f"Failed to insert rendered equation: {e}")
+                    self._fallback_equation_paragraph(story, styles, clean_math)
+            else:
+                # Render failed -- fall back to a clean Unicode paragraph
+                self._fallback_equation_paragraph(story, styles, clean_math)
         elif etype == "callout":
             ctype = el.get("callout_type", "Note")
             color = colors.whitesmoke
@@ -319,6 +343,24 @@ class PdfEngine:
                     ('VALIGN', (0,0), (-1,-1), 'TOP'),
                 ]))
                 story.append(t)
+
+    def _fallback_equation_paragraph(self, story, styles, equation: str):
+        """If the PNG render fails, use the cleaned-up Unicode text in a
+        centered italic block. Better than raw LaTeX, but no math layout.
+        """
+        from .utils import clean_latex
+        cleaned = clean_latex(equation)
+        data = [[Paragraph(pdf_safe(cleaned), styles['Math'])]]
+        t = Table(data, colWidths=[6.0 * inch])
+        t.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#F8F9F9")),
+            ('BOX', (0, 0), (-1, -1), 0.5, colors.HexColor("#D5DBDB")),
+            ('TOPPADDING', (0, 0), (-1, -1), 5),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ]))
+        story.append(Spacer(1, 0.1 * inch))
+        story.append(t)
+        story.append(Spacer(1, 0.1 * inch))
 
     def _add_table_from_md(self, story, styles, md_table):
         rows_data = []

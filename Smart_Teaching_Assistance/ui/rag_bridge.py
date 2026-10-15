@@ -89,8 +89,8 @@ def has_rag() -> bool:
 def get_rag_context(
     topic: str,
     *,
-    section_id: str = "",
-    k_text: int = 6,
+    section_id: Optional[str] = None,
+    k_text: int = 8,
     k_figures: int = 2,
     rerank: bool = True,
 ) -> RetrievalContext:
@@ -102,8 +102,37 @@ def get_rag_context(
         return RetrievalContext(query=topic)
     if not _ensure_indexed():
         return RetrievalContext(query=topic)
-    corpus = st.session_state.course_corpus
-    courses_dir = st.session_state.courses_dir
+    return get_rag_context_for_thread(
+        topic,
+        corpus=st.session_state.course_corpus,
+        courses_dir=st.session_state.courses_dir,
+        section_id=section_id,
+        k_text=k_text,
+        k_figures=k_figures,
+        rerank=rerank,
+    )
+
+
+def get_rag_context_for_thread(
+    topic: str,
+    *,
+    corpus,
+    courses_dir,
+    section_id: Optional[str] = None,
+    k_text: int = 8,
+    k_figures: int = 2,
+    rerank: bool = True,
+) -> RetrievalContext:
+    """Thread-safe variant of get_rag_context.
+
+    Takes the corpus + courses_dir as explicit arguments instead of
+    pulling them from st.session_state (which is unavailable from
+    background threads). The first call from the main thread should
+    ensure the index is built; subsequent calls in the background
+    thread can use the existing on-disk Chroma store.
+    """
+    if corpus is None or not courses_dir:
+        return RetrievalContext(query=topic)
     try:
         return retrieve(
             corpus, courses_dir,

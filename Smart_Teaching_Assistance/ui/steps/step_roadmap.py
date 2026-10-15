@@ -184,28 +184,36 @@ def _render_roadmap_live_progress(worker: BackgroundRoadmapWorker):
             st.rerun(scope="app")
 
 
-def _build_roadmap_callable(phase_cb, difficulty: str):
+def _build_roadmap_callable(phase_cb, difficulty: str, *, config, syllabus_text,
+                            subject_name, user_id, course_corpus, courses_dir):
     """Build the roadmap generation callable.
 
-    The RAG retrieval (which loads the BGE-M3 embedder, 10-30s on
-    first call) runs INSIDE this background callable so the main
-    thread is never blocked. The phase_cb is called with progress
-    messages so the live-progress fragment can show what's happening.
+    All session state is captured on the main thread and passed in
+    as kwargs. This is required because background threads do not
+    have access to st.session_state (no ScriptRunContext). The RAG
+    retrieval (which loads the BGE-M3 embedder, 10-30s on first
+    call) runs INSIDE this background callable so the main thread
+    is never blocked. The phase_cb is called with progress messages
+    so the live-progress fragment can show what's happening.
     """
     def _do_it():
-        config = get_config()
-        db = get_db(config)
+        from Smart_Teaching_Assistance.config import get_database
+        from Smart_Teaching_Assistance.ui.steps._shared import get_content_generator
+
+        db = get_database(config.db_path)
         ContentGenerator = get_content_generator()
 
         # Build the source on this thread (not the main thread) so
         # the BGE-M3 model load doesn't freeze the UI.
-        source_parts: list = [st.session_state.syllabus_text]
-        if st.session_state.get("course_corpus") is not None:
+        source_parts: list = [syllabus_text]
+        if course_corpus is not None and courses_dir:
             try:
-                from Smart_Teaching_Assistance.ui.rag_bridge import get_rag_context
+                from Smart_Teaching_Assistance.ui.rag_bridge import get_rag_context_for_thread
                 phase_cb("preparing", "loading BGE-M3 embedder + retrieving book excerpts...")
-                rag_ctx = get_rag_context(
-                    st.session_state.subject_name,
+                rag_ctx = get_rag_context_for_thread(
+                    subject_name,
+                    corpus=course_corpus,
+                    courses_dir=courses_dir,
                     k_text=8, k_figures=2, rerank=True,
                 )
                 if rag_ctx.text_excerpts or rag_ctx.matching_figures:
@@ -226,11 +234,11 @@ def _build_roadmap_callable(phase_cb, difficulty: str):
             config.gemini_api_key, db,
             model_name=config.gemini_model,
             rotation_callback=rotate_api_key,
-            user_id=st.session_state.user_id,
+            user_id=user_id,
         )
         phase_cb("calling_ai", f"model={config.gemini_model or 'gemini-flash'}, source={len(source):,} chars")
         result = gen.generate_and_store_roadmap(
-            source, difficulty, subject=st.session_state.subject_name
+            source, difficulty, subject=subject_name
         )
         phase_cb("parsing", f"{len(result.get('roadmap_text',''))} chars returned")
         return result
@@ -283,13 +291,30 @@ def step_roadmap():
             type="primary" if not st.session_state.roadmap_generated else "secondary",
             use_container_width=True,
         ):
+            # Capture all needed session state on the MAIN thread
+            # before spawning the worker -- background threads have
+            # no ScriptRunContext, so they cannot access
+            # st.session_state at all.
+            try:
+                config = get_config()
+            except Exception as _e:
+                st.error(f"Could not load configuration: {_e}")
+                return
+            captured = {
+                "config": config,
+                "syllabus_text": st.session_state.get("syllabus_text", ""),
+                "subject_name": st.session_state.get("subject_name", "Course"),
+                "user_id": st.session_state.get("user_id"),
+                "course_corpus": st.session_state.get("course_corpus"),
+                "courses_dir": st.session_state.get("courses_dir"),
+            }
             # Mark worker as "preparing" so the live-progress fragment
             # renders IMMEDIATELY (before the worker thread is even
             # spawned). Otherwise the user sees a frozen page until
             # the thread starts.
             worker.update_phase("preparing", "starting background thread...")
             phase_cb = worker.update_phase
-            callable_ = _build_roadmap_callable(phase_cb, difficulty)
+            callable_ = _build_roadmap_callable(phase_cb, difficulty, **captured)
             started = worker.start(gen_callable=callable_, gen_kwargs={})
             if started:
                 from Smart_Teaching_Assistance.ui.state_manager import (

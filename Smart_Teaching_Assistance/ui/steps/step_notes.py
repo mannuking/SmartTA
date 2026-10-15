@@ -641,21 +641,146 @@ def _render_image_section():
     total_imgs, found_imgs, missing_els = _get_image_stats()
 
     if total_imgs == 0:
-        st.info("ℹ️ No image placeholders in the generated notes.")
+        # No image_placeholder elements yet -- but maybe the user uploaded
+        # a PDF and we have figure_block candidates that haven't been
+        # placed.  Show a one-click attach button in that case.
+        corpus = st.session_state.get("course_corpus")
+        n_source = len(corpus.figures) if corpus and hasattr(corpus, 'figures') else 0
+        st.markdown("### 🖼️ Image Status")
+        if n_source:
+            st.info(
+                f"📦 **{n_source} figure(s)** are available from your uploaded PDF "
+                f"but none are placed in the notes yet. "
+                f"Click below to attach them to the matching topics."
+            )
+            if st.button(
+                f"🖼️ Attach {n_source} PDF figure(s) to the notes",
+                type="primary",
+                use_container_width=True,
+            ):
+                try:
+                    from Smart_Teaching_Assistance.ui.rag_bridge import place_figures_into_notes
+                    st.session_state.all_notes_data = place_figures_into_notes(
+                        st.session_state.all_notes_data
+                    )
+                    save_course_state()
+                    placed = sum(
+                        1 for n in st.session_state.all_notes_data
+                        for e in n.get("elements", [])
+                        if e.get("type") == "figure_block"
+                    )
+                    log_activity(
+                        f"Attached {placed} PDF figure(s) to the notes.",
+                        icon="🖼️", level="success",
+                    )
+                    st.toast(f"Placed {placed} figure(s) — re-render to see them.")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Figure attach failed: {e}")
+                    logger.error(f"figure attach failed: {e}", exc_info=True)
+        else:
+            st.info("ℹ️ No image placeholders in the generated notes.")
         return
 
     st.markdown("### 🖼️ Image Status")
 
-    col_ok, col_miss, col_total = st.columns(3)
-    col_ok.metric("✅ Found", found_imgs)
-    col_miss.metric("❌ Missing", len(missing_els))
-    col_total.metric("📊 Total", total_imgs)
+    # Count separately: image_placeholder (LLM web images) vs figure_block (PDF figures)
+    n_placeholders = 0
+    n_placeholder_found = 0
+    n_placeholder_missing = 0
+    n_figure_blocks = 0
+    n_figure_blocks_ok = 0
+    for topic in st.session_state.get("all_notes_data", []):
+        for el in topic.get("elements", []):
+            etype = el.get("type", "")
+            if etype == "image_placeholder":
+                n_placeholders += 1
+                local = el.get("image_local_path", "")
+                if local and os.path.isfile(local):
+                    n_placeholder_found += 1
+                else:
+                    n_placeholder_missing += 1
+            elif etype == "figure_block":
+                n_figure_blocks += 1
+                local = el.get("image_path", "")
+                if local and os.path.isfile(local):
+                    n_figure_blocks_ok += 1
 
-    if not missing_els:
-        st.success("All images fetched successfully!")
+    # Show the two pools as separate sub-tables
+    if n_placeholders:
+        col_ok, col_miss, col_total = st.columns(3)
+        col_ok.metric("✅ Web Imgs", n_placeholder_found)
+        col_miss.metric("❌ Web Missing", n_placeholder_missing)
+        col_total.metric("📊 Web Total", n_placeholders)
+    if n_figure_blocks:
+        col_ok2, col_miss2, col_total2 = st.columns(3)
+        col_ok2.metric("✅ PDF Figs", n_figure_blocks_ok)
+        miss_fb = n_figure_blocks - n_figure_blocks_ok
+        col_miss2.metric("❌ PDF Missing", miss_fb)
+        col_total2.metric("📊 PDF Total", n_figure_blocks)
+
+    # Reuse the existing total/found for the legacy retry button path
+    total_imgs = n_placeholders
+    found_imgs = n_placeholder_found
+    missing_els = [el for topic in st.session_state.get("all_notes_data", [])
+                   for el in topic.get("elements", [])
+                   if el.get("type") == "image_placeholder"
+                   and not (el.get("image_local_path", "") and os.path.isfile(el.get("image_local_path", "")))]
+
+    if not n_placeholders and not n_figure_blocks:
         return
 
-    st.warning(f"**{len(missing_els)}** images could not be fetched. You can retry or provide URLs manually.")
+    if not missing_els:
+        st.success("All web images fetched successfully!")
+        return
+
+    if n_placeholders:
+        st.warning(f"**{n_placeholder_missing}** web image(s) could not be fetched. You can retry or provide URLs manually.")
+
+    # ── Re-attach PDF figures button ──────────────────────────────────
+    # If the user uploaded a PDF and figures haven't been placed in the
+    # notes yet, show a one-click attach button right here.
+    corpus = st.session_state.get("course_corpus")
+    n_source = len(corpus.figures) if corpus and hasattr(corpus, 'figures') else 0
+    if n_source and n_figure_blocks < n_source:
+        st.warning(
+            f"📦 **{n_source} figure(s)** extracted from your uploaded PDF but only "
+            f"**{n_figure_blocks}** are placed in the notes. Click below to attach the rest."
+        )
+        if st.button(
+            f"🖼️ Attach {n_source - n_figure_blocks} remaining PDF figure(s)",
+            type="primary",
+            use_container_width=True,
+        ):
+            try:
+                from Smart_Teaching_Assistance.ui.rag_bridge import place_figures_into_notes
+                st.session_state.all_notes_data = place_figures_into_notes(
+                    st.session_state.all_notes_data
+                )
+                save_course_state()
+                # Also rebuild notes_markdown so the captions appear in the on-screen view
+                try:
+                    ContentGenerator = get_content_generator()
+                    st.session_state.notes_markdown = ContentGenerator.elements_to_markdown(
+                        st.session_state.all_notes_data,
+                        st.session_state.get("answer_key_text", ""),
+                    )
+                except Exception:
+                    pass
+                placed = sum(
+                    1 for n in st.session_state.all_notes_data
+                    for e in n.get("elements", [])
+                    if e.get("type") == "figure_block"
+                )
+                log_activity(
+                    f"Attached {placed} PDF figure(s) to the notes.",
+                    icon="🖼️", level="success",
+                )
+                st.toast(f"Now {placed} PDF figure(s) placed in the notes.")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Figure attach failed: {e}")
+                logger.error(f"figure attach failed: {e}", exc_info=True)
 
     # ── Retry button ─────────────────────────────────────────────────
     if st.button("🔄 Retry Failed Images", type="primary"):

@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_BASE_URL = "https://api.minimax.io/anthropic"
 DEFAULT_MODEL = "MiniMax-M3"
 DEFAULT_TIMEOUT_S = 90.0
-DEFAULT_MAX_TOKENS = 8192
+DEFAULT_MAX_TOKENS = 16384
 RETRY_BACKOFF_S = 2.0
 GEMINI_FALLBACK_MODEL = "gemini-flash-lite-latest"
 
@@ -258,6 +258,13 @@ def _post_anthropic(messages: list, *, max_tokens: int, temperature: float, syst
 def _gemini_generate_text(prompt_text: str, *, max_tokens: int, temperature: float) -> str:
     """Call Gemini 2.5 Flash Lite (text-only).
 
+    Auto-retries on truncation: if Gemini returns MAX_TOKENS or the
+    output looks like it was cut off mid-JSON (no closing brace), we
+    double max_tokens and try again. This matters because notes
+    generation often produces 6-8k chars of structured content; the
+    default 8192 cap is hit often and the resulting truncated JSON
+    can't be parsed, leaving topics as raw text in the export.
+
     Raises RuntimeError if no Gemini key is set or the call fails.
     """
     api_key = _get_gemini_api_key()
@@ -265,18 +272,66 @@ def _gemini_generate_text(prompt_text: str, *, max_tokens: int, temperature: flo
         raise RuntimeError("GEMINI_API_KEY not set; cannot fall back from MiniMax")
     model = os.environ.get("GEMINI_FALLBACK_MODEL", GEMINI_FALLBACK_MODEL)
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-    body = {
-        "contents": [{"parts": [{"text": prompt_text}]}],
-        "generationConfig": {"maxOutputTokens": max_tokens, "temperature": temperature},
-    }
-    data = json.dumps(body).encode("utf-8")
-    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=_State.timeout_s) as resp:
-        result = json.loads(resp.read().decode("utf-8"))
-    return "".join(
-        part.get("text", "")
-        for part in result.get("candidates", [{}])[0].get("content", {}).get("parts", [])
-    ).strip()
+
+    text = ""
+    for attempt in range(3):
+        body = {
+            "contents": [{"parts": [{"text": prompt_text}]}],
+            "generationConfig": {"maxOutputTokens": max_tokens, "temperature": temperature},
+        }
+        data = json.dumps(body).encode("utf-8")
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=_State.timeout_s) as resp:
+            result = json.loads(resp.read().decode("utf-8"))
+
+        candidate = (result.get("candidates") or [{}])[0]
+        finish_reason = candidate.get("finishReason", "")
+        text = "".join(
+            part.get("text", "")
+            for part in candidate.get("content", {}).get("parts", [])
+        ).strip()
+
+        # MAX_TOKENS == "MAX_TOKENS" (4 in the enum, string in v1beta)
+        # Recitation / safety stops also count -- if we got text at all,
+        # accept it; if we got nothing, treat as truncation and retry.
+        if finish_reason == "MAX_TOKENS":
+            new_max = min(max_tokens * 2, 16384)
+            logger.warning(
+                "Gemini output hit max_tokens=%d (got %d chars); retrying with %d",
+                max_tokens, len(text), new_max,
+            )
+            max_tokens = new_max
+            continue
+
+        # Heuristic: if the response looks like JSON (starts with { or [)
+        # and the closing bracket is missing, it was almost certainly
+        # truncated. Retry with more tokens.
+        stripped = text.strip()
+        if stripped.startswith(("{", "[")):
+            open_b = stripped.count("{")
+            close_b = stripped.count("}")
+            open_k = stripped.count("[")
+            close_k = stripped.count("]")
+            if (open_b > close_b) or (open_k > close_k):
+                new_max = min(max_tokens * 2, 16384)
+                logger.warning(
+                    "Gemini output looks truncated (braces unbalanced: "
+                    "{=%d, }=%d, [=%d, ]=%d, %d chars); retrying with %d",
+                    open_b, close_b, open_k, close_k, len(text), new_max,
+                )
+                max_tokens = new_max
+                continue
+
+        # Got real output -- return it.
+        return text
+
+    # All retries exhausted -- return whatever we got. The parser
+    # will fall back to "raw text" handling.
+    logger.error(
+        "Gemini output still truncated after 3 retries (max_tokens=%d, %d chars)",
+        max_tokens, len(text),
+    )
+    return text
 
 
 def _gemini_generate_vision(prompt_text: str, image_paths: list, *, max_tokens: int, temperature: float) -> str:
@@ -337,7 +392,14 @@ class _GenerationResponse:
 
 
 def _extract_text_from_anthropic(result: dict) -> str:
-    """Pull the concatenated text out of an Anthropic Messages response body."""
+    """Pull the concatenated text out of an Anthropic Messages response body.
+
+    Also note: the result dict's "stop_reason" field tells callers
+    whether the response was truncated by max_tokens. We don't change
+    the public return type (just the text) so existing callers don't
+    break, but readers can check result.get("stop_reason") after the
+    call if they want to retry.
+    """
     parts: list = []
     for block in (result.get("content") or []):
         if isinstance(block, dict) and block.get("type") == "text":
@@ -435,8 +497,35 @@ class GenerativeModel:
             try:
                 content = _build_messages_content(prompt_text, None)
                 messages = [{"role": "user", "content": content}]
-                raw = _post_anthropic(messages, max_tokens=max_tokens, temperature=temperature)
-                return _extract_text_from_anthropic(raw)
+                # Loop on max_tokens: MiniMax (Anthropic-compatible)
+                # returns stop_reason="max_tokens" when the output got
+                # cut off. The lecture-notes prompt commonly produces
+                # 5-7k chars; the default 8192 cap is hit often, and
+                # truncated JSON then fails the parser.
+                max_t = max_tokens
+                anthropic_text = ""
+                for attempt in range(3):
+                    raw = _post_anthropic(
+                        messages, max_tokens=max_t, temperature=temperature
+                    )
+                    anthropic_text = _extract_text_from_anthropic(raw)
+                    if raw.get("stop_reason") != "max_tokens":
+                        return anthropic_text
+                    # Heuristic: also check for unbalanced braces (in
+                    # case stop_reason is wrong but the JSON is broken).
+                    stripped = anthropic_text.strip()
+                    if stripped.startswith(("{", "[")):
+                        ob, cb = stripped.count("{"), stripped.count("}")
+                        ok, ck = stripped.count("["), stripped.count("]")
+                        if ob == cb and ok == ck:
+                            return anthropic_text
+                    new_max = min(max_t * 2, 16384)
+                    logger.warning(
+                        "MiniMax output hit max_tokens=%d (got %d chars); "
+                        "retrying with %d", max_t, len(anthropic_text), new_max,
+                    )
+                    max_t = new_max
+                return anthropic_text
             except _MiniMaxHTTPError as e:
                 # 401 / 403: the API key is dead for this account. Stop
                 # trying it for the rest of the process -- every other

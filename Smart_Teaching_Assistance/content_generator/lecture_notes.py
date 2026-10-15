@@ -419,6 +419,25 @@ Create the content now:
         if elements is not None:
             return elements
 
+        # Strategy 10: try to REPAIR a truncated JSON by closing the
+        # unbalanced braces/brackets and stripping a dangling trailing
+        # comma. The LLM hit max_tokens mid-element; the JSON up to
+        # that point is usually valid, just incomplete. By appending
+        # the missing closing characters, json.loads succeeds and we
+        # get a (truncated) but parseable structure.
+        elements = self._try_close_truncated_json(cleaned, topic_id)
+        if elements is not None:
+            return elements
+
+        # Strategy 11: last-ditch "everything looks like elements".
+        # If the raw text has a `elements` key followed by an
+        # unbalanced `[`, build a synthetic structure that lists every
+        # `type`/`content` pair found in the rest of the text.
+        # Cheaper than dropping the whole topic to plain text.
+        elements = self._try_fragments_as_elements(cleaned, topic_id)
+        if elements is not None:
+            return elements
+
         # All strategies failed -- convert raw text to clean readable elements
         logger.error(f"All JSON recovery failed for {topic_id}, converting to text")
         return self._raw_text_to_elements(raw)
@@ -665,6 +684,182 @@ Create the content now:
                 return data
         except (json.JSONDecodeError, TypeError):
             pass
+        return None
+
+    def _try_close_truncated_json(self, text: str, topic_id: str):
+        """Repair a truncated JSON by appending missing closing chars.
+
+        The LLM hit max_tokens mid-element. The JSON up to that point
+        is usually valid -- just missing the closing } or ] of an
+        inner object/array. By counting brace depth (ignoring strings
+        and escapes) and appending the missing closers, json.loads
+        can succeed and we recover a (truncated) but parseable
+        structure.
+
+        Also handles the harder case where the JSON was cut mid-string
+        content (e.g. "Last paragraph that got cut). We try multiple
+        repair strategies in order:
+          1. Just append the missing closers
+          2. Close the dangling string, strip a trailing partial
+             word, then append the closers
+          3. Close the dangling string (without stripping), then
+             append the closers (string content may be incomplete but
+             json.loads tolerates this when the structure is balanced)
+
+        Returns the elements list, or None if all repair attempts fail.
+        """
+        s = text.rstrip()
+        if not s or not s.startswith(("{", "[")):
+            return None
+        # Strip a trailing comma if present (illegal in JSON)
+        while s.endswith(","):
+            s = s[:-1].rstrip()
+        # Count braces and brackets, ignoring those inside strings.
+        depth_b = 0
+        depth_k = 0
+        in_str = False
+        esc = False
+        for ch in s:
+            if in_str:
+                if esc:
+                    esc = False
+                elif ch == "\\":
+                    esc = True
+                elif ch == '"':
+                    in_str = False
+                continue
+            if ch == '"':
+                in_str = True
+            elif ch == "{":
+                depth_b += 1
+            elif ch == "}":
+                if depth_b > 0:
+                    depth_b -= 1
+            elif ch == "[":
+                depth_k += 1
+            elif ch == "]":
+                if depth_k > 0:
+                    depth_k -= 1
+        # If we're already balanced, nothing to repair.
+        if depth_b == 0 and depth_k == 0 and not in_str:
+            return None
+
+        def _try_load(candidate: str):
+            """Try a list of plausible close patterns and return the first parse.
+
+            The LLM almost always truncates mid-value-of-`"content"`, so
+            the common close is "}]} (close string, close element obj,
+            close elements array, close outer object). We try that
+            first, then several fallbacks for less-common truncation
+            points (inside an array, between fields, inside the outer
+            object directly, etc.).
+            """
+            close_patterns = [
+                '"}]}',         # truncate inside element.content (most common)
+                '"]}]}',        # same, with different position
+                '"]}"]}',       # truncate between fields
+                '"]}',          # truncate inside an element with no array
+                '"]}"}]',       # truncate inside string within nested object
+                '"]}}}',        # more closing braces than needed (extra })
+                '"]}}]}',       # even more
+                '"]',           # truncate inside a bare string array
+                '"}',           # truncate inside a bare string field
+            ]
+            for extra in close_patterns:
+                try:
+                    return json.loads(candidate + extra)
+                except json.JSONDecodeError:
+                    continue
+            return None
+
+        # Attempt 1: just append closers
+        data = _try_load(s)
+        if data is not None:
+            logger.warning(
+                "Repaired truncated JSON for %s (appended %d braces, %d brackets)",
+                topic_id, depth_b, depth_k,
+            )
+            return self._extract_elements_from_data(data)
+
+        # Attempt 2: if we were in a string, back up to the last safe
+        # word boundary (a space), close the string, then append
+        # closers. This handles "Last paragraph that got cut by
+        # removing "cut" so it becomes "Last paragraph that got " -- a
+        # complete, parseable string.
+        if in_str:
+            # Walk back to the last whitespace in the (incomplete) string
+            cut = s.rstrip()
+            # Don't strip past the opening quote
+            last_quote = cut.rfind('"')
+            if last_quote > 0 and last_quote < len(cut) - 1:
+                after_quote = cut[last_quote + 1:]
+                # Find last space in after_quote
+                last_space = after_quote.rfind(' ')
+                if last_space > 0:
+                    s2 = cut[:last_quote + 1 + last_space]
+                    data = _try_load(s2)
+                    if data is not None:
+                        logger.warning(
+                            "Repaired truncated JSON for %s (backed up to last word boundary)",
+                            topic_id,
+                        )
+                        return self._extract_elements_from_data(data)
+
+        return None
+
+    @staticmethod
+    def _extract_elements_from_data(data):
+        """Pull 'elements' out of a parsed JSON object or list."""
+        if isinstance(data, dict) and "elements" in data:
+            return data["elements"]
+        if isinstance(data, list):
+            return data
+        return None
+
+    def _try_fragments_as_elements(self, text: str, topic_id: str):
+        """Last-ditch: extract every "type"/"content" pair as a text element.
+
+        When the LLM output is severely broken (truncated mid-string,
+        or wrapped in a way none of the previous strategies can
+        parse), this still salvages the readable content by looking
+        for individual element-like fragments anywhere in the text.
+        """
+        elements = []
+        # Look for the "elements" key. If we find it but the rest of
+        # the JSON is broken, this is still our best bet.
+        for m in re.finditer(
+            r'"type"\s*:\s*"([^"]+)"\s*,\s*"content"\s*:\s*"((?:[^"\\]|\\.)*)"',
+            text,
+        ):
+            etype = m.group(1)
+            content = m.group(2)
+            # Unescape JSON string escapes
+            content = content.replace("\\n", "\n").replace('\\"', '"').replace("\\t", "\t")
+            if len(content.strip()) > 5:
+                el = {"type": etype, "content": content.strip()}
+                # Add level for headings so they render right
+                if etype == "heading":
+                    el["level"] = 2
+                elements.append(el)
+        # Also try the more lenient {type, content} pattern (no quotes)
+        if not elements:
+            for m in re.finditer(
+                r'type[:=]\s*[\'"]?(\w+)[\'"]?[^}\]]*?content[:=]\s*[\'"]([^\'"}]{5,2000})[\'"]',
+                text,
+            ):
+                etype = m.group(1)
+                content = m.group(2)
+                if etype in ("text", "heading", "callout", "equation", "code"):
+                    el = {"type": etype, "content": content.strip()}
+                    if etype == "heading":
+                        el["level"] = 2
+                    elements.append(el)
+        if elements:
+            logger.warning(
+                "Salvaged %d element fragments for %s (full JSON was unrecoverable)",
+                len(elements), topic_id,
+            )
+            return elements
         return None
 
     @staticmethod

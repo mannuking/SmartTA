@@ -305,6 +305,26 @@ def _sync_worker_to_session(worker: BackgroundNotesWorker, total_needed: int):
                 except Exception as e:
                     logger.warning(f"figure placement failed: {e}")
 
+            # Persist notes to the per-user, per-course folder on
+            # disk so the user can re-open Step 4 (or jump to
+            # Step 6) after a server restart without re-running
+            # the entire pipeline.
+            try:
+                from Smart_Teaching_Assistance.ui.rag_bridge import save_notes_for_course
+                _pdf_hash = st.session_state.get("pdf_hash") or (
+                    st.session_state.course_corpus.pdf_hash
+                    if st.session_state.get("course_corpus") else ""
+                )
+                if _pdf_hash:
+                    save_notes_for_course(
+                        _pdf_hash,
+                        all_notes,
+                        answer_key_text=answer_key,
+                        notes_markdown=st.session_state.get("notes_markdown", ""),
+                    )
+            except Exception as e:
+                logger.warning(f"notes persist failed: {e}")
+
             save_course_state()
             set_generation_status("idle")
 

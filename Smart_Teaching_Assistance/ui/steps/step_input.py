@@ -23,6 +23,70 @@ def step_input():
         "and optionally upload a **textbook PDF** for richer context."
     )
 
+    # ── Restore from disk ────────────────────────────────────────────────
+    # If the user has uploaded a PDF in a previous session, the corpus
+    # + figures + notes are all saved to the per-user, per-course
+    # folder on disk. Show a banner with a one-click restore so they
+    # don't have to re-upload the PDF every time.
+    pdf_hash = st.session_state.get("pdf_hash")
+    if pdf_hash:
+        try:
+            from Smart_Teaching_Assistance.ui.rag_bridge import (
+                load_corpus_for_session,
+                load_figures_for_course,
+                load_notes_for_course,
+                user_courses_base,
+            )
+            figs = load_figures_for_course(pdf_hash)
+            notes = load_notes_for_course(pdf_hash)
+            userdata_dir = user_courses_base()
+            if figs or notes:
+                with st.container(border=True):
+                    st.markdown("#### 💾 Saved data found on disk")
+                    cols = st.columns([3, 2, 2])
+                    cols[0].markdown(
+                        f"**{len(figs)}** figure(s)  •  "
+                        f"**{len(notes.get('all_notes_data', []))}** note(s)  •  "
+                        f"**{len(notes.get('answer_key_text', ''))}** chars answer key"
+                    )
+                    cols[1].markdown(
+                        f"<small>📁 {userdata_dir}</small>",
+                        unsafe_allow_html=True,
+                    )
+                    if cols[2].button(
+                        "🔄 Restore everything",
+                        type="primary",
+                        use_container_width=True,
+                        help="Re-load the saved PDF figures + notes + answer key into this session without re-uploading.",
+                    ):
+                        # Re-hydrate the corpus (figures + chroma)
+                        corpus = load_corpus_for_session(pdf_hash)
+                        if corpus:
+                            st.session_state.course_corpus = corpus
+                            st.session_state.courses_dir = str(userdata_dir)
+                            st.session_state.rag_ready = False
+                        # Re-hydrate notes if any
+                        if notes and notes.get("all_notes_data"):
+                            st.session_state.all_notes_data = notes["all_notes_data"]
+                            st.session_state.detailed_notes_generated = True
+                            if notes.get("answer_key_text"):
+                                st.session_state.answer_key_text = notes["answer_key_text"]
+                            if notes.get("notes_markdown"):
+                                st.session_state.notes_markdown = notes["notes_markdown"]
+                        n_figs = len(corpus.figures) if corpus else 0
+                        n_notes = len(notes.get("all_notes_data", []))
+                        st.success(
+                            f"Restored {n_figs} figure(s) and {n_notes} note(s) from disk. "
+                            f"You can jump to Step 4 to edit notes or Step 6 to export."
+                        )
+                        log_activity(
+                            f"Restored {n_figs} figures + {n_notes} notes from local disk.",
+                            icon="💾", level="success",
+                        )
+                        st.rerun()
+        except Exception as restore_err:
+            logger.debug(f"restore banner skipped: {restore_err}")
+
     # ── Subject name ─────────────────────────────────────────────────────
     subj_name = st.text_input(
         "📝 Subject Name",

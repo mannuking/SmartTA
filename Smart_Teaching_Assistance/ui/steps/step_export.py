@@ -156,6 +156,25 @@ def _ensure_notes_for_export():
                 except Exception as fig_err:
                     logger.debug(f"figure placement skipped: {fig_err}")
 
+            # Persist the auto-generated notes to disk so the user
+            # can re-open the course later without re-running
+            # Step 1-3-4.
+            try:
+                from Smart_Teaching_Assistance.ui.rag_bridge import save_notes_for_course
+                _pdf_hash = st.session_state.get("pdf_hash") or (
+                    st.session_state.course_corpus.pdf_hash
+                    if st.session_state.get("course_corpus") else ""
+                )
+                if _pdf_hash and notes_data:
+                    save_notes_for_course(
+                        _pdf_hash,
+                        notes_data,
+                        answer_key_text=answer_key or st.session_state.get("answer_key_text", ""),
+                        notes_markdown=st.session_state.get("notes_markdown", ""),
+                    )
+            except Exception as persist_err:
+                logger.debug(f"notes persist on skip-to-export skipped: {persist_err}")
+
             _render("✅ Notes ready", f"loaded {len(notes_data)} topic blocks", 1.0)
             progress.empty()
             log_activity(

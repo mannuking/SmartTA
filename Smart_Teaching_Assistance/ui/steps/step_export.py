@@ -242,6 +242,66 @@ def step_export():
 
     st.markdown("---")
 
+    # ── Figure re-attachment ──────────────────────────────────────────────
+    # The notes in session_state might not have figure_block elements
+    # if they were generated before the figure_placer fix. The user
+    # can click this button to force a re-run of place_figures_into_notes
+    # against the current course_corpus (if any).
+    fig_cols = st.columns([2, 3])
+    with fig_cols[0]:
+        if st.button(
+            "🖼️ Re-attach PDF figures to notes",
+            use_container_width=True,
+            help="Re-run figure_placer to inject the 10 figures from your PDF into the matching topics.",
+        ):
+            try:
+                from Smart_Teaching_Assistance.ui.rag_bridge import place_figures_into_notes
+                before = sum(
+                    1 for n in st.session_state.all_notes_data
+                    for e in n.get("elements", [])
+                    if e.get("type") == "figure_block"
+                )
+                st.session_state.all_notes_data = place_figures_into_notes(
+                    st.session_state.all_notes_data
+                )
+                after = sum(
+                    1 for n in st.session_state.all_notes_data
+                    for e in n.get("elements", [])
+                    if e.get("type") == "figure_block"
+                )
+                placed = after - before
+                log_activity(
+                    f"Re-attached figures: +{placed} new (now {after} total figure_block elements)",
+                    icon="🖼️", level="success",
+                )
+                st.toast(f"Placed {placed} figure(s) — now {after} figure_block(s) in notes.")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Re-attach failed: {e}")
+                logger.error(f"Re-attach figures failed: {e}", exc_info=True)
+    with fig_cols[1]:
+        # Show how many figure_block elements are currently in notes
+        total_fb = sum(
+            1 for n in st.session_state.all_notes_data
+            for e in n.get("elements", [])
+            if e.get("type") == "figure_block"
+        )
+        # And how many source figures are available
+        corpus = st.session_state.get("course_corpus")
+        n_source = len(corpus.figures) if corpus and hasattr(corpus, 'figures') else 0
+        st.markdown(
+            f"<small>📦 Source figures: **{n_source}**  •  "
+            f"🖼️ Placed in notes: **{total_fb}**</small>",
+            unsafe_allow_html=True,
+        )
+        if n_source and not total_fb:
+            st.warning(
+                f"⚠️ {n_source} figure(s) available from your PDF but none placed in the notes yet. "
+                f"Click 'Re-attach' to add them."
+            )
+
+    st.markdown("---")
+
     # ── Core Package ─────────────────────────────────────────────────────
     st.subheader("📄 Core Package")
     exp = ExportManager(db_path=get_config().db_path)

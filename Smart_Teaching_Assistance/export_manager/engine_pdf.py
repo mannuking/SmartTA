@@ -181,6 +181,30 @@ class PdfEngine:
         return str(output_path)
 
     def _add_element(self, story, styles, el, depth, temp_files):
+        # Wrap the whole element handler in try/except so one bad
+        # element doesn't kill the entire export. A misformed LLM
+        # tag can throw a ReportLab parse error, but the rest of
+        # the notes are still valuable.
+        try:
+            self._add_element_inner(story, styles, el, depth, temp_files)
+        except Exception as e:
+            etype = el.get("type", "?")
+            content_preview = str(el.get("content", ""))[:80]
+            logger.error(
+                "Skipping %s element due to export error: %s | content: %r",
+                etype, e, content_preview,
+            )
+            # Show a placeholder so the user knows something was skipped
+            try:
+                from .utils import escape_xml
+                story.append(Paragraph(
+                    f"<font color='gray'><i>[{escape_xml(etype)} element skipped: {escape_xml(str(e)[:60])}]</i></font>",
+                    styles['Normal'],
+                ))
+            except Exception:
+                pass
+
+    def _add_element_inner(self, story, styles, el, depth, temp_files):
         etype = el.get("type")
         content = el.get("content", "")
         if etype == "text" and looks_like_json(content):

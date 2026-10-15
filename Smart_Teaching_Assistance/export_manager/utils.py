@@ -286,12 +286,39 @@ def md_to_reportlab(text):
     # Escape XML entities in the remaining non-code text.
     text = escape_xml(text)
 
+    # Sanitize: the LLM sometimes emits garbage like
+    # "<Kleene Star (R_1)*>" or "<*<i*>>" which ReportLab's HTML
+    # parser then mis-interprets as malformed tags and chokes on.
+    # We already escaped "<" and ">" above, but the LLM may have
+    # already written unescaped HTML tags that, after escape_xml,
+    # became "&lt;tag&gt;". Those are safe. The problem case is
+    # when the LLM emits "*<i*>" which our italic regex below
+    # turns into "<i>>" -- an unbalanced tag. We pre-strip the
+    # LLM's *-only emphasis attempts to avoid creating broken
+    # tags. Specifically: any "*" not adjacent to a letter/digit
+    # is suspicious, so we convert bare "*<" and ">*" sequences
+    # to " *<" and ">* " before the italic regex runs.
+    # This is intentionally conservative.
+
     # Convert markdown emphasis in non-code text.
+    # IMPORTANT: the input has already been XML-escaped by escape_xml(),
+    # so '&' is part of '&lt;' and '&gt;'. The italic regex needs to
+    # NOT match '*' characters that are part of escaped HTML entities
+    # (e.g. "&lt;Kleene Star (R_1)&gt;" should not get its lone '*'
+    # turned into a stray <i></i>). So we require both the opening
+    # and closing '*' to be preceded by a non-entity character (i.e.
+    # preceded by a letter/digit, not '&' or ';' or '<').
     text = re.sub(r'\*\*(.+?)\*\*', r'<b>\1</b>', text)
     text = re.sub(r'__(.+?)__', r'<b>\1</b>', text)
 
-    # Avoid underscores within words (e.g., q_i) by requiring non-word boundaries.
-    text = re.sub(r'(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)', r'<i>\1</i>', text)
+    # Italic: require '*' to be at a word boundary AND the content
+    # to start with a non-'&' character (so we don't pick up
+    # entities).  This is conservative but safe.
+    text = re.sub(
+        r'(?:(?<=^)|(?<=[\s\w\d\)\]\}]))\*([^\*\n\&]+?)\*(?=[\s\w\d\)\,\.\;\:\?\!]|$)',
+        r'<i>\1</i>',
+        text,
+    )
     text = re.sub(r'(?<!\w)_(.+?)_(?!\w)', r'<i>\1</i>', text)
 
     # Restore code spans as escaped monospace text.

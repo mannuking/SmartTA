@@ -38,9 +38,12 @@ logger = logging.getLogger(__name__)
 # Cosine distance threshold for "this figure belongs here". ChromaDB
 # returns cosine DISTANCE in [0, 2] where 0 = identical, 2 = opposite.
 # A distance of 0.5 means moderate similarity. We keep figures
-# with distance <= 0.85 (a fairly loose cutoff, then let the
-# boost/penalty sort pick the best 1-2).
-FIGURE_DIST_THRESHOLD = 0.85
+# with distance <= 1.0 (a fairly loose cutoff, then let the
+# boost/penalty sort pick the best 1-2).  1.0 is essentially
+# "any figure with positive cosine similarity" -- ensures we
+# don't drop figures that the model thinks are even slightly
+# related to a section.
+FIGURE_DIST_THRESHOLD = 1.0
 
 
 def _sub_section_text(note: dict) -> str:
@@ -168,6 +171,80 @@ def place_figures_in_notes(
                 break
         if placed:
             logger.info("placed %d figure(s) in %s", placed, sec_id or note.get("title", "?"))
+
+    # ── Second pass: place any unplaced figures into unplaced sections ──
+    # The first pass greedily picks the best match for each section, but
+    # some figures can lose the ranking war for a single section even
+    # though they have a good match elsewhere.  This pass looks at each
+    # unplaced figure and finds the closest UNFILLED section for it.
+    if corpus.figures and any(
+        f.id not in used_figure_ids for f in corpus.figures
+    ):
+        unplaced_notes = [
+            n for n in notes
+            if not any(e.get("type") == "figure_block" for e in n.get("elements", []))
+        ]
+        for fig in corpus.figures:
+            if fig.id in used_figure_ids:
+                continue
+            if not unplaced_notes:
+                break
+            # Find the unplaced section whose text is closest to the
+            # figure's caption + description.
+            query = f"{fig.caption}. {fig.description}".strip()
+            if not query:
+                continue
+            hits = _store.query_figures(corpus, courses_dir, query, k=20)
+            # The first hit is the figure itself (best match = itself).
+            # Find the closest *unplaced section* by walking the hits.
+            best_note = None
+            best_dist = 999.0
+            for h in hits:
+                if h["id"] != fig.id:
+                    continue
+                # The figure is in hits[?] with itself. The other
+                # hits in the same response are sections that have
+                # this figure as a candidate. Use the section boost
+                # info: query_figures returns section_id from the
+                # figure's metadata; we need to find the note whose
+                # _sub_section_text matches.
+                break
+            # Fall back: re-query each unplaced note's query and
+            # find the unplaced section where this figure is the
+            # BEST match (even if it's not in the top-1 by distance,
+            # it's the best of the remaining unplaced figures).
+            for note in unplaced_notes:
+                n_query = _sub_section_text(note)
+                nh = _store.query_figures(corpus, courses_dir, n_query, k=5)
+                # Find the position of our figure in the candidates
+                for rank, h in enumerate(nh):
+                    if h["id"] == fig.id:
+                        # Use the unplaced-figure penalty: if the
+                        # best candidate for this section is also
+                        # unplaced, prefer the section where our
+                        # figure ranks higher.
+                        score = -h["distance"] - 0.05 * rank
+                        if score > -best_dist:
+                            best_dist = -score
+                            best_note = note
+                        break
+            if best_note is None or best_dist > threshold:
+                continue
+            elements = best_note.setdefault("elements", [])
+            elements.insert(0, {
+                "type": "figure_block",
+                "image_path": fig.image_path,
+                "caption": fig.caption or "",
+                "description": fig.description or "",
+                "source_id": fig.id,
+                "page": fig.page,
+            })
+            used_figure_ids.add(fig.id)
+            unplaced_notes.remove(best_note)
+            logger.info(
+                "second-pass placed %s in %s (dist=%.3f)",
+                fig.id, best_note.get("id", "?"), best_dist,
+            )
 
     return notes
 

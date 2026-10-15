@@ -118,7 +118,29 @@ def place_figures_in_notes(
         if f.section_id:
             by_section.setdefault(f.section_id, []).append(f)
 
+    # ── Idempotency: seed used_figure_ids from existing figure_blocks ──
+    # If the user re-runs the placer (e.g. clicks 'Attach' twice),
+    # we must NOT re-place a figure that already exists somewhere
+    # in the notes.  Without this seed, the second run starts with
+    # an empty set and would re-place fig-p6-c1 in T2.2 even though
+    # it was already placed in T1 by the first run.
     used_figure_ids: set[str] = set()
+    for _n in notes:
+        for _e in _n.get("elements", []):
+            if _e.get("type") == "figure_block" and _e.get("source_id"):
+                used_figure_ids.add(_e["source_id"])
+
+    # Also build a per-topic dedup set: in the second pass the same
+    # figure could theoretically be placed in two different topics
+    # if the ranking ties -- we want to avoid that.  The placer is
+    # already guarded by max_figures_per_section, but this is an
+    # extra belt-and-suspenders check.
+    placed_figures_by_topic: dict[str, set[str]] = {}
+    for _n in notes:
+        sids = placed_figures_by_topic.setdefault(_n.get("id", ""), set())
+        for _e in _n.get("elements", []):
+            if _e.get("type") == "figure_block" and _e.get("source_id"):
+                sids.add(_e["source_id"])
 
     for note in notes:
         elements = note.setdefault("elements", [])
@@ -153,6 +175,14 @@ def place_figures_in_notes(
                 continue  # too far away -- not a good match
             if h["id"] in used_figure_ids:
                 continue
+            # Per-topic dedup: never add the same source_id twice to
+            # the same note (defense in depth -- the global dedup
+            # above also catches this, but this is cheap insurance
+            # in case a section's top-3 candidates all point at the
+            # same source_id via the section-boost).
+            topic_sids = placed_figures_by_topic.get(note.get("id", ""), set())
+            if h["id"] in topic_sids:
+                continue
             # Find the full Figure object to get the description
             fig_obj = next((f for f in corpus.figures if f.id == h["id"]), None)
             if not fig_obj:
@@ -166,6 +196,7 @@ def place_figures_in_notes(
                 "page": fig_obj.page,
             })
             used_figure_ids.add(fig_obj.id)
+            placed_figures_by_topic.setdefault(note.get("id", ""), set()).add(fig_obj.id)
             placed += 1
             if placed >= max_figures_per_section:
                 break
@@ -240,6 +271,7 @@ def place_figures_in_notes(
                 "page": fig.page,
             })
             used_figure_ids.add(fig.id)
+            placed_figures_by_topic.setdefault(best_note.get("id", ""), set()).add(fig.id)
             unplaced_notes.remove(best_note)
             logger.info(
                 "second-pass placed %s in %s (dist=%.3f)",

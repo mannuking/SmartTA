@@ -475,3 +475,124 @@ def _fmt(secs: float) -> str:
     h, rem = divmod(total, 3600)
     m, s = divmod(rem, 60)
     return f"{h}h {m:02d}m {s:02d}s"
+
+
+# ============================================================================
+# Roadmap worker -- single-shot generation in a thread.
+# ============================================================================
+
+class BackgroundRoadmapWorker:
+    """Run roadmap generation in a background thread.
+
+    The roadmap step is a single AI call (no per-topic loop), so the
+    progress model is simpler than BackgroundLPWorker: a phase string
+    ("preparing", "calling_ai", "parsing", "storing", "done") and a
+    free-form message. The elapsed timer ticks every fragment refresh
+    because the worker thread doesn't block the main script.
+
+    Lifecycle:
+        worker.start(...)        →  spawns thread
+        worker.progress          →  read-only snapshot
+        worker.results           →  final result dict when done
+        worker.pause()           →  not applicable for roadmap (no-op)
+    """
+
+    def __init__(self):
+        self._thread: Optional[threading.Thread] = None
+        self._lock = threading.Lock()
+        self._pause_event = threading.Event()
+        self._stop_event = threading.Event()
+
+        self._progress: Dict[str, Any] = {
+            "status": "idle",          # idle | running | completed | error
+            "phase": "idle",           # idle | preparing | calling_ai | parsing | storing | done
+            "message": "",
+            "elapsed": 0.0,
+            "elapsed_str": "",
+            "error": None,
+        }
+        self._results: Optional[Dict[str, Any]] = None
+        self._t0: float = 0.0
+
+    @property
+    def is_running(self) -> bool:
+        return self._thread is not None and self._thread.is_alive()
+
+    @property
+    def status(self) -> str:
+        with self._lock:
+            return self._progress["status"]
+
+    @property
+    def progress(self) -> Dict[str, Any]:
+        with self._lock:
+            return dict(self._progress)
+
+    @property
+    def results(self) -> Optional[Dict[str, Any]]:
+        with self._lock:
+            return self._results
+
+    def start(
+        self,
+        gen_callable: Callable,
+        gen_kwargs: Dict[str, Any],
+    ) -> bool:
+        """Start (or re-start) the roadmap generation in a background thread."""
+        if self.is_running:
+            return False
+
+        self._pause_event.clear()
+        self._stop_event.clear()
+        self._results = None
+        self._t0 = time.time()
+
+        with self._lock:
+            self._progress = {
+                "status": "running",
+                "phase": "preparing",
+                "message": "Preparing source...",
+                "elapsed": 0.0,
+                "elapsed_str": "0.0s",
+                "error": None,
+            }
+
+        self._thread = threading.Thread(
+            target=self._run,
+            args=(gen_callable, gen_kwargs),
+            daemon=True,
+        )
+        self._thread.start()
+        logger.info("Background roadmap worker started")
+        return True
+
+    def update_phase(self, phase: str, message: str = "") -> None:
+        """Update the live progress phase/message from the worker thread.
+
+        Called by the gen_callable (via a phase_cb in gen_kwargs) to
+        report intermediate states like "Calling AI..." or "Parsing..."
+        so the user sees what's happening.
+        """
+        with self._lock:
+            self._progress["phase"] = phase
+            self._progress["message"] = message
+            self._progress["elapsed"] = time.time() - self._t0
+            self._progress["elapsed_str"] = _fmt(self._progress["elapsed"])
+
+    def _run(self, gen_callable: Callable, gen_kwargs: Dict[str, Any]):
+        try:
+            result = gen_callable(**gen_kwargs)
+            with self._lock:
+                self._results = result
+                self._progress["status"] = "completed"
+                self._progress["phase"] = "done"
+                self._progress["message"] = "Completed!"
+                self._progress["elapsed"] = time.time() - self._t0
+                self._progress["elapsed_str"] = _fmt(self._progress["elapsed"])
+            logger.info("Background roadmap worker finished successfully")
+        except Exception as exc:
+            with self._lock:
+                self._progress["status"] = "error"
+                self._progress["error"] = str(exc)
+                self._progress["message"] = f"Error: {exc}"
+            logger.exception("Background roadmap worker error")

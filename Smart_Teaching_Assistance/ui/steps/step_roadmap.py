@@ -197,7 +197,7 @@ def _build_roadmap_callable(phase_cb, difficulty: str, *, config, syllabus_text,
     so the live-progress fragment can show what's happening.
     """
     def _do_it():
-        from Smart_Teaching_Assistance.config import get_database
+        from Smart_Teaching_Assistance.database import get_database
         from Smart_Teaching_Assistance.ui.steps._shared import get_content_generator
 
         db = get_database(config.db_path)

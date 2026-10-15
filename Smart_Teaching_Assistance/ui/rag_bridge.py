@@ -101,6 +101,28 @@ def _ensure_courses_dir() -> Path:
     return COURSES_BASE
 
 
+# Legacy path: pre-Oct-15-2026 corpora were saved to
+# <project>/Smart_Teaching_Assistance/data/courses/. We keep this
+# list of candidate roots so users on the old code path can still
+# see their figures + corpus after a server restart / hot-reload.
+def _legacy_courses_dirs() -> list[Path]:
+    """Return additional course roots that may contain corpora
+    saved by earlier versions of the app. We scan these for
+    figures when the new per-user folder is empty."""
+    candidates = []
+    # 1) Old project-relative path
+    old_proj = Path(__file__).resolve().parents[1] / "data" / "courses"
+    if old_proj.is_dir():
+        candidates.append(old_proj)
+    # 2) Userdata root (in case the user moved their data here)
+    userdata = _userdata_root()
+    if userdata.is_dir():
+        legacy = userdata / "courses"
+        if legacy.is_dir() and legacy.resolve() != COURSES_BASE.resolve():
+            candidates.append(legacy)
+    return candidates
+
+
 def load_corpus_for_session(pdf_hash: str) -> Optional[CourseCorpus]:
     """Try to load a previously-saved corpus from disk into the session.
 

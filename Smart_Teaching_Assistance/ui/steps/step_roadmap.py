@@ -184,11 +184,44 @@ def _render_roadmap_live_progress(worker: BackgroundRoadmapWorker):
             st.rerun(scope="app")
 
 
-def _build_roadmap_callable(phase_cb, source: str, difficulty: str):
+def _build_roadmap_callable(phase_cb, difficulty: str):
+    """Build the roadmap generation callable.
+
+    The RAG retrieval (which loads the BGE-M3 embedder, 10-30s on
+    first call) runs INSIDE this background callable so the main
+    thread is never blocked. The phase_cb is called with progress
+    messages so the live-progress fragment can show what's happening.
+    """
     def _do_it():
         config = get_config()
         db = get_db(config)
         ContentGenerator = get_content_generator()
+
+        # Build the source on this thread (not the main thread) so
+        # the BGE-M3 model load doesn't freeze the UI.
+        source_parts: list = [st.session_state.syllabus_text]
+        if st.session_state.get("course_corpus") is not None:
+            try:
+                from Smart_Teaching_Assistance.ui.rag_bridge import get_rag_context
+                phase_cb("preparing", "loading BGE-M3 embedder + retrieving book excerpts...")
+                rag_ctx = get_rag_context(
+                    st.session_state.subject_name,
+                    k_text=8, k_figures=2, rerank=True,
+                )
+                if rag_ctx.text_excerpts or rag_ctx.matching_figures:
+                    rag_block = rag_ctx.as_prompt_block()
+                    source_parts.append(
+                        "\n\n--- RELEVANT BOOK EXCERPTS (RAG-retrieved) ---\n"
+                        + rag_block
+                        + "\n\nINSTRUCTION: Stay faithful to the book excerpts above. "
+                        "Do NOT introduce topics that are not covered in the book. "
+                        "If the book doesn't cover a sub-topic, omit it."
+                    )
+                    phase_cb("preparing", f"retrieved {len(rag_ctx.text_excerpts)} book excerpts")
+            except Exception as _e:
+                phase_cb("preparing", f"RAG retrieval skipped: {_e}")
+
+        source = "\n\n".join(source_parts)
         gen = ContentGenerator(
             config.gemini_api_key, db,
             model_name=config.gemini_model,
@@ -250,26 +283,13 @@ def step_roadmap():
             type="primary" if not st.session_state.roadmap_generated else "secondary",
             use_container_width=True,
         ):
-            source_parts: list = [st.session_state.syllabus_text]
-            if st.session_state.get("course_corpus") is not None:
-                from Smart_Teaching_Assistance.ui.rag_bridge import get_rag_context
-                rag_ctx = get_rag_context(
-                    st.session_state.subject_name,
-                    k_text=8, k_figures=2, rerank=True,
-                )
-                if rag_ctx.text_excerpts or rag_ctx.matching_figures:
-                    rag_block = rag_ctx.as_prompt_block()
-                    source_parts.append(
-                        "\n\n--- RELEVANT BOOK EXCERPTS (RAG-retrieved) ---\n"
-                        + rag_block
-                        + "\n\nINSTRUCTION: Stay faithful to the book excerpts above. "
-                        "Do NOT introduce topics that are not covered in the book. "
-                        "If the book doesn't cover a sub-topic, omit it."
-                    )
-            source = "\n\n".join(source_parts)
+            # Mark worker as "preparing" so the live-progress fragment
+            # renders IMMEDIATELY (before the worker thread is even
+            # spawned). Otherwise the user sees a frozen page until
+            # the thread starts.
+            worker.update_phase("preparing", "starting background thread...")
             phase_cb = worker.update_phase
-            phase_cb("preparing", "resolving RAG excerpts from the uploaded PDF")
-            callable_ = _build_roadmap_callable(phase_cb, source, difficulty)
+            callable_ = _build_roadmap_callable(phase_cb, difficulty)
             started = worker.start(gen_callable=callable_, gen_kwargs={})
             if started:
                 from Smart_Teaching_Assistance.ui.state_manager import (
@@ -283,6 +303,8 @@ def step_roadmap():
                 update_sidebar_progress(task="Roadmap")
                 st.session_state.pop("_rm_terminal_rerun", None)
                 st.rerun()
+            else:
+                st.error("Could not start roadmap worker (already running?).")
 
     # ── View / Edit ──────────────────────────────────────────────────────
     if st.session_state.roadmap_generated:

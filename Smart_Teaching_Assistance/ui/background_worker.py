@@ -578,6 +578,10 @@ class BackgroundRoadmapWorker:
             self._progress["message"] = message
             self._progress["elapsed"] = time.time() - self._t0
             self._progress["elapsed_str"] = _fmt(self._progress["elapsed"])
+            # Auto-promote "idle" -> "running" so the fragment can
+            # render even before start() is called.
+            if self._progress["status"] == "idle":
+                self._progress["status"] = "running"
 
     def _run(self, gen_callable: Callable, gen_kwargs: Dict[str, Any]):
         try:

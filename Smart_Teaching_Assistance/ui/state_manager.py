@@ -284,7 +284,8 @@ def go(step: int):
     st.session_state._nav_pending = step
 
 def get_config() -> Config:
-    if st.session_state.config is None:
+    cfg = st.session_state.get("config")
+    if cfg is None:
         try:
             from dotenv import load_dotenv; load_dotenv()
         except ImportError:
@@ -292,8 +293,9 @@ def get_config() -> Config:
         # Use API key from session (user-entered) or env var
         api_key = st.session_state.get("gemini_api_key", "")
         user_id = st.session_state.get("user_id")
-        st.session_state.config = load_config_from_env(api_key_override=api_key or None, user_id=user_id)
-    return st.session_state.config
+        cfg = load_config_from_env(api_key_override=api_key or None, user_id=user_id)
+        st.session_state.config = cfg
+    return cfg
 
 
 def has_api_key() -> bool:
@@ -421,17 +423,20 @@ def set_api_key(key: str):
     add_api_key(key)
 
 def get_db(config=None):
-    if st.session_state.db is None:
+    db_inst = st.session_state.get("db")
+    if db_inst is None:
         if config is None:
             config = get_config()
-        st.session_state.db = get_database(config.db_path)
+        db_inst = get_database(config.db_path)
+        st.session_state.db = db_inst
     try:
-        st.session_state.db.connect()
+        db_inst.connect()
     except Exception:
         if config is None:
             config = get_config()
-        st.session_state.db = get_database(config.db_path)
-    return st.session_state.db
+        db_inst = get_database(config.db_path)
+        st.session_state.db = db_inst
+    return db_inst
 
 def save_course_state():
     if not st.session_state.subject_name:

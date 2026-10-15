@@ -658,6 +658,56 @@ def _get_image_stats():
 
 def _render_image_section():
     """Show image fetch status and retry controls after notes are complete."""
+    # ── Auto-restore banner (survives a server restart) ─────────────────
+    # If pdf_hash is in session_state but the in-memory course_corpus
+    # is gone (typical after a server restart), the 10 figures are
+    # still on disk in figures_index.json. Show a one-click rehydrate
+    # so the user doesn't have to navigate back to Step 1.
+    pdf_hash = st.session_state.get("pdf_hash")
+    if pdf_hash and st.session_state.get("course_corpus") is None:
+        try:
+            from Smart_Teaching_Assistance.ui.rag_bridge import (
+                load_corpus_for_session,
+                load_figures_for_course,
+                user_courses_base,
+            )
+            figs = load_figures_for_course(pdf_hash)
+            if figs:
+                with st.container(border=True):
+                    cols = st.columns([4, 2])
+                    cols[0].markdown(
+                        f"💾 **{len(figs)} figure(s)** saved on disk from your PDF, "
+                        f"but the in-memory corpus is empty (probably after a server "
+                        f"restart). Click to re-load them — no need to re-upload."
+                    )
+                    if cols[1].button(
+                        f"🔄 Re-load {len(figs)} figure(s) from disk",
+                        type="primary",
+                        use_container_width=True,
+                        key="reload_figures_from_disk",
+                    ):
+                        courses_dir = user_courses_base()
+                        corpus = load_corpus_for_session(pdf_hash)
+                        if corpus:
+                            st.session_state.course_corpus = corpus
+                            st.session_state.courses_dir = str(courses_dir)
+                            st.session_state.rag_ready = False
+                            st.success(
+                                f"Re-loaded {len(corpus.figures)} figure(s) from disk."
+                            )
+                            log_activity(
+                                f"Re-loaded {len(corpus.figures)} figure(s) from disk.",
+                                icon="💾", level="success",
+                            )
+                            st.rerun()
+                        else:
+                            st.error(
+                                f"No corpus on disk for pdf_hash={pdf_hash[:8]}. "
+                                f"You'll need to re-upload the PDF in Step 1."
+                            )
+        except Exception as restore_err:
+            logger.debug(f"auto-restore banner skipped: {restore_err}")
+
     total_imgs, found_imgs, missing_els = _get_image_stats()
 
     if total_imgs == 0:

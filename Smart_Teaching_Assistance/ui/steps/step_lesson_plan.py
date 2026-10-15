@@ -324,16 +324,24 @@ def _sync_lp_worker_to_session(worker: BackgroundLPWorker, total_nodes: int):
 # re-rendering at 0.5s is fine for a single row of metrics (negligible CPU).
 @st.fragment(run_every=timedelta(milliseconds=500))
 def _render_lp_live_progress(worker: BackgroundLPWorker, total_nodes: int):
+    # Wrap in a div so the .lp-live CSS scoping works.
+    st.markdown('<div class="lp-live">', unsafe_allow_html=True)
     prog = worker.progress
     status = prog.get("status", "idle")
     completed = prog.get("completed", 0)
     total = prog.get("total", total_nodes)
     frac = prog.get("frac", 0.0)
     message = prog.get("message", "")
-    elapsed_str = prog.get("elapsed_str", "")
     eta_str = prog.get("eta_str", "")
 
     _sync_lp_worker_to_session(worker, total_nodes)
+
+    # Compute elapsed locally so the counter actually ticks every 0.5s
+    # instead of jumping in 5-10s blocks (worker only updates elapsed
+    # on each topic completion).
+    t0 = worker._t0 if hasattr(worker, "_t0") else 0.0
+    elapsed_s = max(0.0, _time.time() - t0) if t0 else prog.get("elapsed", 0.0)
+    elapsed_str = _fmt_seconds(elapsed_s)
 
     st.markdown("### 📝 Generating Lesson Plan...")
     st.progress(frac)
@@ -378,15 +386,101 @@ def _render_lp_live_progress(worker: BackgroundLPWorker, total_nodes: int):
         with col2:
             active_id = st.session_state.get("active_lp_id", flat_topics[0]["id"])
             topic = next((t["node"] for t in flat_topics if t["id"] == active_id), flat_topics[-1]["node"])
-            st.markdown(f"## {topic.get('id', '')} {topic.get('title', 'Untitled')}")
+            # Brand-colored title with id+title
+            st.markdown(
+                f'<h2 class="lp-topic-title">{topic.get("id", "")} {topic.get("title", "Untitled")}</h2>',
+                unsafe_allow_html=True,
+            )
             with st.container(border=True):
-                st.markdown(topic.get("content", "_Generating..._"))
+                # Build the best display we can: structured_content first,
+                # then teaching_prompt, then the composed content, then
+                # a clearly-labelled "still generating" if all empty.
+                _render_topic_content(topic)
+
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # If worker finished between refreshes, trigger ONE full-app rerun
     if status in ("completed", "paused", "error"):
         if not st.session_state.get("_lp_terminal_rerun"):
             st.session_state._lp_terminal_rerun = True
             st.rerun(scope="app")
+
+
+def _fmt_seconds(s: float) -> str:
+    """Format seconds -> human-readable string with sub-second precision."""
+    s = max(0.0, float(s))
+    if s < 60:
+        return f"{s:.1f}s"
+    if s < 3600:
+        m = int(s // 60)
+        sec = int(s % 60)
+        return f"{m}m {sec:02d}s"
+    h = int(s // 3600)
+    m = int((s % 3600) // 60)
+    return f"{h}h {m:02d}m"
+
+
+def _render_topic_content(topic: dict):
+    """Render the most informative view of a topic during live generation.
+
+    Falls back through (in order):
+      1. structured_content (the 8 lesson-plan sections)
+      2. teaching_prompt (the Section Mega Prompt)
+      3. composed content (markdown)
+      4. A clear "still generating" placeholder.
+    """
+    structured = topic.get("structured_content") or {}
+    teaching_prompt = (topic.get("teaching_prompt") or "").strip()
+    content = (topic.get("content") or "").strip()
+
+    # If structured content is populated, render the sections.
+    if isinstance(structured, dict) and any(str(v).strip() for v in structured.values() if v):
+        # Order matches the LP_SECTION_FIELDS in the editor
+        section_order = [
+            "learning_objectives", "key_concepts", "instructional_content",
+            "engagement_activities", "assessment_methods",
+            "potential_challenges", "eli5_suggestion", "additional_notes",
+        ]
+        titles = {
+            "learning_objectives": "🎯 Learning Objectives",
+            "key_concepts": "🧠 Key Concepts & Definitions",
+            "instructional_content": "📚 Instructional Content Outline",
+            "engagement_activities": "🎲 Engagement Strategies & Activities",
+            "assessment_methods": "✅ Assessment Methods & Checkpoints",
+            "potential_challenges": "⚠️ Potential Challenges & Misconceptions",
+            "eli5_suggestion": "💡 ELI5 for Complex Concepts",
+            "additional_notes": "📝 Educator Notes",
+        }
+        for key in section_order:
+            val = (structured.get(key) or "").strip()
+            if val:
+                st.markdown(f"#### {titles.get(key, key.replace('_', ' ').title())}")
+                st.markdown(val)
+                st.markdown("")
+
+    # Always show the mega prompt if present, even when structured
+    # content is also there. Users want to see the actual section
+    # instructions, not just the polished plan.
+    if teaching_prompt:
+        st.markdown("#### 📜 Section Mega Prompt")
+        st.markdown(teaching_prompt)
+        st.markdown("")
+
+    # Last-ditch: show composed content if structured + mega are empty
+    # but the worker populated `content`.
+    if not structured and not teaching_prompt and content:
+        st.markdown(content)
+        return
+
+    # If we got here, this topic hasn't been filled in yet.
+    if not structured and not teaching_prompt and not content:
+        st.markdown(
+            '<p style="color: var(--text-muted); font-style: italic;">'
+            '⏳ Still generating this section — the AI will populate '
+            'learning objectives, key concepts, and the teaching prompt '
+            'in a moment.</p>',
+            unsafe_allow_html=True,
+        )
 
 
 # ── Private: Navigator ──────────────────────────────────────────────────────

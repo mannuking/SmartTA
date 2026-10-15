@@ -639,3 +639,98 @@ div[data-testid="stProgress"]>div>div>div {
     padding-top: 0.5rem;
     margin-top: 0.75rem;
 }
+
+/* ============================================================================
+   LESSON PLAN — Live progress light theme
+   ============================================================================ */
+
+/* The h3 "Generating Lesson Plan..." default Streamlit gives a dark
+   background. Override to a clean light card. */
+.lp-live h3 {
+    background: var(--primary-light) !important;
+    color: var(--primary) !important;
+    padding: 10px 14px !important;
+    border-radius: 8px !important;
+    border-left: 4px solid var(--primary) !important;
+    margin: 4px 0 12px 0 !important;
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+}
+
+/* Force light surfaces for st.metric, st.container(border=True),
+   and topic-button rows in the live progress fragment. The user
+   said the dark blocks were unreadable. */
+.lp-live div[data-testid="stMetric"] {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    padding: 10px 12px !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.lp-live div[data-testid="stMetric"] label {
+    color: var(--text-secondary) !important;
+    font-weight: 500 !important;
+}
+
+.lp-live div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
+    color: var(--text) !important;
+    font-weight: 700 !important;
+}
+
+.lp-live div[data-testid="stMetric"] div[data-testid="stMetricDelta"] {
+    color: var(--text-secondary) !important;
+}
+
+.lp-live div[data-testid="stVerticalBlockBorderWrapper"] {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+/* The h2 topic title inside the live preview used to render in
+   default Streamlit dark color on the dark card. Brand it. */
+.lp-live h2.lp-topic-title,
+.lp-live div[data-testid="stMarkdownContainer"] h2 {
+    color: var(--primary) !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid var(--primary-light) !important;
+    padding-bottom: 6px !important;
+    margin-bottom: 8px !important;
+}
+
+/* The "Generating..." placeholder text should be muted italic,
+   not a missing-element artifact. */
+.lp-live em:contains("Generating") {
+    color: var(--text-muted) !important;
+    font-style: italic !important;
+}
+
+/* Topic list buttons in the live preview: active = brand,
+   inactive = light surface. */
+.lp-live .stButton button {
+    border-radius: 6px !important;
+    text-align: left !important;
+    font-size: 0.85rem !important;
+    padding: 6px 10px !important;
+}
+
+.lp-live .stButton button[kind="primary"] {
+    background: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
+}
+
+.lp-live .stButton button[kind="secondary"] {
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+}
+
+.lp-live .stButton button[kind="secondary"]:hover {
+    background: var(--primary-light) !important;
+    border-color: var(--primary) !important;
+}

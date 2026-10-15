@@ -599,21 +599,40 @@ def _render_exam_tools():
 # ── Private: Image management after notes are done ───────────────────────────
 
 def _get_image_stats():
-    """Scan all_notes_data and return (total_placeholders, found, missing_elements)."""
+    """Scan all_notes_data and return (total_placeholders, found, missing_elements).
+
+    Counts BOTH image_placeholder (LLM-requested web images) AND
+    figure_block (locally-extracted PDF figures). The previous
+    version only counted image_placeholder, which made it look like
+    0 figures were placed even when figure_placer had successfully
+    injected 10 figure_blocks from the uploaded PDF.
+    """
     all_notes = st.session_state.get("all_notes_data", [])
     total = 0
     found = 0
     missing = []
     for topic in all_notes:
         for el in topic.get("elements", []):
-            if el.get("type") != "image_placeholder":
-                continue
-            total += 1
-            local = el.get("image_local_path", "")
-            if local and os.path.isfile(local):
-                found += 1
-            else:
-                missing.append(el)
+            etype = el.get("type", "")
+            if etype == "image_placeholder":
+                # LLM-requested web image; we check image_local_path.
+                total += 1
+                local = el.get("image_local_path", "")
+                if local and os.path.isfile(local):
+                    found += 1
+                else:
+                    missing.append(el)
+            elif etype == "figure_block":
+                # Locally-extracted PDF figure; we check image_path.
+                total += 1
+                local = el.get("image_path", "")
+                if local and os.path.isfile(local):
+                    found += 1
+                else:
+                    # Only mark missing if the file truly doesn't exist
+                    # (not just unindexed). Caption is still useful
+                    # context for the user.
+                    missing.append(el)
     return total, found, missing
 
 

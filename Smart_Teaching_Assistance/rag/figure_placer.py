@@ -42,11 +42,30 @@ FIGURE_SIM_THRESHOLD = 0.28
 
 
 def _sub_section_text(note: dict) -> str:
-    """Extract the 'query' for matching a figure to this sub-section."""
+    """Extract the 'query' for matching a figure to this sub-section.
+
+    The note structure in the codebase is:
+        {"id": "T2.1", "title": "DFA basics", "elements": [...]}
+    with NO top-level "text" or "body" field. To get the
+    section's content for embedding, we have to walk the
+    elements list and concatenate the text-bearing ones
+    (text/heading/callout).
+    """
     title = str(note.get("title") or note.get("id") or "")
-    body = str(note.get("text") or note.get("body") or note.get("content") or "")
-    # Take the title + first chunk of body.
-    return f"{title}. {body[:200]}".strip()
+    parts: list[str] = []
+    body_chars = 0
+    for el in note.get("elements", []) or []:
+        etype = el.get("type", "")
+        if etype in ("text", "heading", "callout", "eli5_suggestion",
+                      "instructional_content", "additional_notes"):
+            chunk = str(el.get("content", "")).strip()
+            if chunk:
+                parts.append(chunk)
+                body_chars += len(chunk)
+                if body_chars >= 400:
+                    break
+    body = " ".join(parts)
+    return f"{title}. {body[:400]}".strip()
 
 
 def place_figures_in_notes(

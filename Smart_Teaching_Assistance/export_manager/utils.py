@@ -18,7 +18,10 @@ logger = logging.getLogger(__name__)
 # source code free of escape conflicts. If you change these patterns,
 # keep the leading r on the string literal.
 RE_DOLLAR = re.compile(r'(?<!\\)\$')
-RE_LATEX_CMD = re.compile(r'\\(?:text|textbf|mathbf|mathrm|textit|operatorname)\{([^}]*)\}')
+RE_LATEX_CMD = re.compile(
+    chr(92) + chr(92) + "(?:text|textbf|mathbf|mathrm|textit|operatorname)"
+    + chr(92) + chr(92) + chr(123) + "([^}]*)" + chr(92) + chr(92) + chr(125)
+)
 RE_FRAC = re.compile(r'\\frac\{([^}]*)\}\{([^}]*)\}')
 RE_SUPERSCRIPT = re.compile(r'\^\{([^}]*)\}')
 RE_SUBSCRIPT = re.compile(r'_\{([^}]*)\}')
@@ -96,6 +99,35 @@ def clean_latex(text):
     text = text.replace('$$', '')
     text = RE_DOLLAR.sub('', text)
 
+    # Drop accent commands FIRST (before the symbol substitution).
+    # Otherwise \hat\delta gets converted to \hatδ (Greek delta) and
+    # the accent regex can no longer strip the \hat wrapper.
+    BS = chr(92)
+    LB = chr(123)  # {
+    RB = chr(125)  # }
+    accent_names = (
+        "hat|bar|tilde|vec|dot|ddot|acute|grave|check|breve"
+        "|overline|underline|widehat|widetilde"
+    )
+    # Pattern A: \hat\{\delta\} (escaped braces) -> \1 = "delta"
+    accent_escaped = (
+        BS + BS + "(?:" + accent_names + ")"
+        + BS + BS + LB + "([^}]*)" + BS + BS + RB
+    )
+    text = re.sub(accent_escaped, r"\1", text)
+    # Pattern B: \hat{\delta} (plain braces) -> \1 = "delta"
+    accent_plain_braced = (
+        BS + BS + "(?:" + accent_names + ")"
+        + BS + LB + "([^}]*)" + BS + RB
+    )
+    text = re.sub(accent_plain_braced, r"\1", text)
+    # Pattern C: \hat\delta (no braces, accent + single-letter cmd)
+    accent_plain = (
+        BS + BS + "(?:" + accent_names + ")"
+        + BS + BS + "([A-Za-z])"
+    )
+    text = re.sub(accent_plain, r"\1", text)
+
     # Drop styling prefixes (the content inside the braces is preserved).
     text = RE_LATEX_CMD.sub(r'\1', text)
 
@@ -103,15 +135,6 @@ def clean_latex(text):
     # descending so \textbf eats before \text.
     for cmd, symbol in sorted(LATEX_SYMBOL_MAP.items(), key=lambda kv: -len(kv[0])):
         text = text.replace(cmd, symbol)
-
-    # Drop accent commands -- the actual letter inside is preserved;
-    # the math renderer (mathtext) handles the visual accent, while
-    # this plain-text fallback just keeps the letter.
-    text = re.sub(
-        r'\\(?:hat|bar|tilde|vec|dot|ddot|acute|grave|check|breve'
-        r'|overline|underline|widehat|widetilde)\{([^}]*)\}',
-        r'\1', text,
-    )
 
     # Fractions: \frac{a}{b} -> a/b. Recurse to handle nested.
     while True:
@@ -124,19 +147,31 @@ def clean_latex(text):
     text = RE_SQRT.sub(r'√(\1)', text)
 
     # Defensive: drop any ceiling/floor command names still left
-    text = text.replace(r'\lceil', '⌈').replace(r'\rceil', '⌉')
-    text = text.replace(r'\lfloor', '⌊').replace(r'\rfloor', '⌋')
+    BS = chr(92)
+    text = text.replace(BS + 'lceil', '⌈').replace(BS + 'rceil', '⌉')
+    text = text.replace(BS + 'lfloor', '⌊').replace(BS + 'rfloor', '⌋')
 
     # Superscripts: x^{ab} -> ^(ab); x^2 -> ^(2)
     text = RE_SUPERSCRIPT.sub(r'^(\1)', text)
     text = re.sub(r'\^([A-Za-z0-9])(?!\{)', r'^(\1)', text)
 
-    # Subscripts: x_{ab} -> _(ab); x_i -> _(i)
+    # Subscripts: x_{ab} -> _\1 (no parens, like x_(ab) but cleaner);
+    # x_i -> _(i). We use _\1 not _(\1) so "q_1" reads as q_1
+    # without the parens that look like LaTeX in the output.
     text = RE_SUBSCRIPT.sub(r'_\1', text)
     text = re.sub(r'_([A-Za-z0-9])(?!\{)', r'_(\1)', text)
 
-    # Strip outer braces that wrap a single balanced expression
-    # (e.g. {q_0} -> q_0). Nested or partial ones are left for later.
+    # Brace handling:
+    #   1. \{ ... \}  -- LaTeX escaped braces, used for SET notation.
+    #      Convert to plain { } and keep the content. This is the
+    #      critical case: \{q_1, q_2\} must read as {q_1, q_2}
+    #      (preserving the set notation, not stripping it).
+    text = re.sub(r'\\\{', '{', text)
+    text = re.sub(r'\\\}', '}', text)
+
+    #   2. Strip matched outer braces that wrap a single balanced
+    #      expression that does NOT contain a comma (e.g. {q_0} -> q_0).
+    #      If the content has a comma, it's a SET, so keep the braces.
     def _strip_matched_outer(s):
         if not (s.startswith('{') and s.endswith('}')):
             return s
@@ -148,16 +183,71 @@ def clean_latex(text):
                 depth -= 1
                 if depth == 0 and i < len(s) - 1:
                     return s  # matching close is not at the very end
-        return s[1:-1] if depth == 0 else s
+        if depth != 0:
+            return s
+        inner = s[1:-1]
+        if ',' in inner:
+            return s  # keep the braces for set notation
+        return inner
     text = _strip_matched_outer(text)
 
-    # Strip ALL remaining unmatched braces (leftover from dropped commands)
-    text = re.sub(r'\{', '(', text)
-    text = re.sub(r'\}', ')', text)
+    #   3. Strip ALL remaining unmatched braces (leftover from
+    #      dropped commands). These are pure LaTeX grouping that
+    #      has no meaning in plain text, so just delete them.
+    #      (Was previously converting { -> ( and } -> ) which
+    #      mangled set notation like \{q_1, q_2\} into
+    #      \q_1, q_2\).)
+    text = re.sub(r'\{', '', text)
+    text = re.sub(r'\}', '', text)
 
     # Normalize LaTeX whitespace commands and collapse spaces
     text = RE_LATEX_WS.sub(' ', text)
     text = RE_MULTI_SPACE.sub(' ', text)
+
+    # Final cleanup: strip any remaining stray backslashes that
+    # don't precede a recognized command. This catches the case
+    # where the LLM emits literal "\." (escaped period),
+    # "\\q_1" (stray backslash from set notation), or any other
+    # leftover LaTeX noise. We keep backslashes that are clearly
+    # still part of a command (followed by an ASCII letter), so
+    # we don't accidentally mangle math.
+    #
+    # First, drop duplicate backslashes (\\ -> \) since the LLM
+    # sometimes emits LaTeX already-escaped braces.
+    while BS + BS in text:
+        text = text.replace(BS + BS, BS)
+    # Single backslashes followed by punctuation: \, \; \! \. \:
+    for esc_punct in [",", ";", "!", ".", ":", "?"]:
+        text = text.replace(BS + esc_punct, esc_punct)
+    # Trailing lone backslashes
+    text = text.rstrip(BS)
+    # Standalone backslashes not followed by an ASCII letter. This
+    # catches "\q_1" and "\." and similar stray backslashes that
+    # survived the LATEX_SYMBOL_MAP / RE_LATEX_CMD passes (i.e.
+    # not a known command). We do this AFTER punctuation cleanup
+    # so the punctuation cases get handled first.
+    LB_NA = chr(92) + chr(92) + "(?![A-Za-z])"
+    text = re.sub(LB_NA, "", text)
+    # And finally, strip stray backslashes before lowercase letters
+    # that are NOT part of a recognized LaTeX command. Since the
+    # LATEX_SYMBOL_MAP and RE_LATEX_CMD already converted all known
+    # commands, anything that survived is either \delta-style
+    # (already converted to Greek) or a stray. Keep a short
+    # allowlist of common commands the LLM might have used that
+    # we haven't mapped yet.
+    _KNOWN_CMD_ALLOWLIST = {
+        "to", "gets", "frac", "sqrt", "notin", "in", "subset",
+        "supset", "le", "ge", "ne", "approx", "equiv", "sim",
+        "to", "rightarrow", "leftarrow", "Leftrightarrow",
+        "mapsto", "forall", "exists", "nexists", "wedge", "vee",
+        "neg", "bot", "top", "vdash", "dashv", "models",
+    }
+    def _strip_unknown_bs(m):
+        cmd = m.group(1)
+        if cmd in _KNOWN_CMD_ALLOWLIST:
+            return m.group(0)
+        return cmd  # drop the backslash, keep the command name
+    text = re.sub(chr(92) + chr(92) + "([A-Za-z]+)", _strip_unknown_bs, text)
 
     return text.strip()
 

@@ -60,6 +60,7 @@ dependencies = [
     # Utilities
     "python-dotenv>=1.0.0",
     "requests>=2.31.0",
+    "ddgs>=9.0.0",  # DuckDuckGo image search for web-image placeholders
     "tqdm>=4.66.0",
 ]
 

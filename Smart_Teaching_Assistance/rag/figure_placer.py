@@ -35,10 +35,12 @@ from . import store as _store
 logger = logging.getLogger(__name__)
 
 
-# Cosine similarity threshold for "this figure belongs here". Below this,
-# we don't insert. Tuned conservatively -- false positives are worse than
-# missed matches because a wrong figure is jarring in the output.
-FIGURE_SIM_THRESHOLD = 0.28
+# Cosine distance threshold for "this figure belongs here". ChromaDB
+# returns cosine DISTANCE in [0, 2] where 0 = identical, 2 = opposite.
+# A distance of 0.5 means moderate similarity. We keep figures
+# with distance <= 0.85 (a fairly loose cutoff, then let the
+# boost/penalty sort pick the best 1-2).
+FIGURE_DIST_THRESHOLD = 0.85
 
 
 def _sub_section_text(note: dict) -> str:
@@ -73,7 +75,7 @@ def place_figures_in_notes(
     corpus: CourseCorpus,
     courses_dir: str,
     *,
-    threshold: float = FIGURE_SIM_THRESHOLD,
+    threshold: float = FIGURE_DIST_THRESHOLD,
     max_figures_per_section: int = 1,
     k_candidates: int = 3,
 ) -> list[dict]:
@@ -129,10 +131,11 @@ def place_figures_in_notes(
 
         # Get the top-k candidates from the figure store
         hits = _store.query_figures(corpus, courses_dir, query, k=k_candidates)
-        # Apply the section boost: if the note has a section_id, prefer
-        # figures whose section_id matches.
+        # ChromaDB `distance` is cosine distance: 0 = identical, 2 = opposite.
+        # We RANK by similarity (higher = better = -distance), and FILTER
+        # by distance <= threshold (lower distance = closer match).
         def boosted(hit):
-            score = -hit["distance"]   # convert distance -> similarity
+            score = -hit["distance"]   # higher is better
             if sec_id and hit.get("section_id") and hit["section_id"].startswith(sec_id.rsplit(".", 1)[0]):
                 score *= 1.5
             if hit["id"] in used_figure_ids:
@@ -142,9 +145,9 @@ def place_figures_in_notes(
         hits.sort(key=boosted, reverse=True)
         placed = 0
         for h in hits:
-            sim = -h["distance"]
-            if sim < threshold:
-                continue
+            dist = h["distance"]
+            if dist > threshold:
+                continue  # too far away -- not a good match
             if h["id"] in used_figure_ids:
                 continue
             # Find the full Figure object to get the description

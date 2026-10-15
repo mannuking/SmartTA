@@ -23,7 +23,7 @@ import threading
 import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Tuple
 
 import requests
 
@@ -287,12 +287,39 @@ def _download_one(url: str, query: str) -> Optional[str]:
         return None
 
 
-def _download_first_match(candidates: List[str], query: str) -> Optional[str]:
-    """Try downloading candidate URLs in order, return first success."""
+def _download_first_match(
+    candidates: List[str],
+    query: str,
+    used_urls: Optional[set] = None,
+    used_paths: Optional[set] = None,
+    lock: Optional[threading.Lock] = None,
+) -> Optional[Tuple[str, str]]:
+    """Try downloading candidate URLs in order, return (local_path, url) for first success.
+
+    If used_urls/lock are provided, atomically claim each URL before
+    downloading so a parallel task in the same batch won't pick the
+    same URL.  This prevents the same image being downloaded twice
+    (and thus appearing twice in the final notes).
+    """
     for url in candidates[:5]:
+        if used_urls is not None and lock is not None:
+            with lock:
+                if url in used_urls:
+                    continue  # another placeholder already took this URL
+                used_urls.add(url)  # claim it before the slow HTTP call
         path = _download_one(url, query)
         if path:
-            return path
+            if used_paths is not None and lock is not None:
+                with lock:
+                    used_paths.add(os.path.normpath(path))
+            return path, url
+        # If the URL was claimed but the download failed, release it
+        # so the next task can try.  Only do this if no other task
+        # has since taken it.
+        if used_urls is not None and lock is not None:
+            with lock:
+                if used_urls == {url}:  # we're the only claimant
+                    used_urls.discard(url)
     return None
 
 
@@ -308,6 +335,14 @@ def populate_images_parallel(
     Phase 1 (sequential): DDG search for each placeholder → candidate URLs.
                            Each search retries internally up to 5 times.
     Phase 2 (parallel):   Download first valid image per placeholder.
+
+    De-duplication:
+      • URLs already used in this batch are skipped (across all
+        placeholders) so the same image never appears twice in the
+        same notes.
+      • Local file paths already used in this batch are also skipped.
+      • On retry, URLs that previously failed are remembered and tried
+        again only if the placeholder has no other options.
 
     Args:
         all_notes:  List of topic dicts (mutated in-place).
@@ -332,6 +367,10 @@ def populate_images_parallel(
         return
 
     # ── Collect placeholders needing images ───────────────────────────
+    # Also collect URLs that are ALREADY placed in this batch so we
+    # don't fetch the same image twice across placeholders.
+    used_urls: set[str] = set()  # type: ignore[name-defined]
+    used_paths: set[str] = set()  # type: ignore[name-defined]
     placeholders: List[Dict] = []
     for topic in all_notes:
         for el in topic.get("elements", []):
@@ -339,7 +378,10 @@ def populate_images_parallel(
                 continue
             local = el.get("image_local_path", "")
             if local and os.path.isfile(local):
+                used_paths.add(os.path.normpath(local))
                 continue
+            if el.get("image_url"):
+                used_urls.add(el["image_url"])
             if el.get("search_query"):
                 placeholders.append(el)
 
@@ -374,6 +416,17 @@ def populate_images_parallel(
             candidates = _search_wikimedia_images(query, max_results=10)
             provider = "Wikimedia"
 
+        # De-dup: drop URLs already used in this batch (across any
+        # placeholder) and drop the per-placeholder self-reference.
+        if candidates:
+            before = len(candidates)
+            candidates = [u for u in candidates if u not in used_urls]
+            if len(candidates) < before:
+                logger.debug(
+                    f"[{idx+1}/{total}] dropped {before - len(candidates)} "
+                    f"duplicate URL(s) from {provider} results"
+                )
+
         if candidates:
             search_results[idx] = candidates
             consecutive_failures = 0
@@ -401,10 +454,24 @@ def populate_images_parallel(
     succeeded = 0
     failed = 0
     done_count = 0
+    # Lock protects BOTH the in-flight counter AND the used_urls /
+    # used_paths sets so that a search-thread or download-thread
+    # cannot observe stale state.
     _counter_lock = threading.Lock()
 
-    def _download_task(idx: int, candidates: List[str]) -> Optional[str]:
-        return _download_first_match(candidates, placeholders[idx]["search_query"])
+    def _download_task(idx: int, candidates: List[str]) -> Optional[Tuple[str, str]]:
+        # Pass the shared used_urls / used_paths / lock into the
+        # downloader so it can atomically claim each URL before the
+        # slow HTTP call.  This is the key to preventing the same
+        # image from being downloaded twice when DDG returns the
+        # same popular URL for two different placeholder queries.
+        return _download_first_match(
+            candidates,
+            placeholders[idx]["search_query"],
+            used_urls=used_urls,
+            used_paths=used_paths,
+            lock=_counter_lock,
+        )
 
     with ThreadPoolExecutor(max_workers=download_workers) as pool:
         future_to_idx = {
@@ -415,19 +482,25 @@ def populate_images_parallel(
             idx = future_to_idx[future]
             el = placeholders[idx]
             try:
-                path = future.result()
+                result = future.result()
             except Exception as exc:
-                path = None
+                result = None
                 logger.warning(f"Download task exception for '{el.get('search_query', '')[:50]}': {exc}")
 
             with _counter_lock:
                 done_count += 1
 
-            if path:
+            if result:
+                path, url = result
                 el["image_local_path"] = path
-                el["image_url"] = el.get("image_url") or ""
+                el["image_url"] = url
+                # Mark this URL as used so subsequent placeholders skip
+                # it even if their own top-hit happens to be the same.
+                with _counter_lock:
+                    used_urls.add(url)
+                    used_paths.add(os.path.normpath(path))
                 succeeded += 1
-                logger.info(f"[{done_count}/{len(search_results)}] ✓ '{el['search_query'][:50]}'")
+                logger.info(f"[{done_count}/{len(search_results)}] ✓ '{el['search_query'][:50]}' from {url[:60]}")
             else:
                 failed += 1
                 logger.warning(f"[{done_count}/{len(search_results)}] ✗ '{el['search_query'][:50]}'")
